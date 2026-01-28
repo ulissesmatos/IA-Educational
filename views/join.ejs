@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+  
+  <!-- Background Decoration -->
+  <div style="position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;">
+    <div style="position: absolute; top: -20%; left: -10%; width: 40%; height: 40%; background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);"></div>
+    <div style="position: absolute; bottom: -20%; right: -10%; width: 50%; height: 50%; background: radial-gradient(circle, rgba(96, 165, 250, 0.08) 0%, transparent 70%);"></div>
+  </div>
+
+  <!-- Main Card -->
+  <div class="card animate-fadeInUp" style="width: 100%; max-width: 420px; padding: 2.5rem; position: relative; z-index: 1;">
+    
+    <!-- Logo & Header -->
+    <div class="text-center mb-8">
+      <div class="animate-float" style="display: inline-block; margin-bottom: 1rem; color: var(--accent-light);">
+        <%- include('icons/cpu-chip', { size: 56 }) %>
+      </div>
+      <h1 class="text-headline gradient-text mb-2">IA ou Não?</h1>
+      <p class="text-caption">Teste seus conhecimentos sobre inteligência artificial</p>
+    </div>
+
+    <!-- Server Error -->
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="callout callout-error mb-6 animate-shake">
+        <span class="callout-icon"><%- include('icons/exclamation-triangle', { size: 20 }) %></span>
+        <div class="callout-content">
+          <p><%= error %></p>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Form -->
+    <form id="join-form" class="space-y-6">
+      
+      <!-- Room Code Input -->
+      <div>
+        <label for="room-code" class="input-label">Código da Sala</label>
+        <input 
+          type="text" 
+          id="room-code" 
+          name="roomCode"
+          placeholder="ABC123"
+          maxlength="6"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          class="input input-code"
+          required
+        >
+        <span id="room-code-error" class="input-error-text hidden"></span>
+      </div>
+
+      <!-- Nickname Input -->
+      <div>
+        <label for="nickname" class="input-label">Seu Apelido</label>
+        <input 
+          type="text" 
+          id="nickname" 
+          name="nickname"
+          placeholder="Como quer ser chamado?"
+          maxlength="30"
+          autocomplete="off"
+          class="input"
+          required
+        >
+        <span id="nickname-error" class="input-error-text hidden"></span>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" id="btn-join" class="btn btn-primary btn-xl w-full">
+        <span id="btn-text">Entrar na Sala</span>
+        <svg id="btn-spinner" class="hidden" style="width: 1.25rem; height: 1.25rem; animation: spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
+        </svg>
+      </button>
+
+      <!-- General Error -->
+      <div id="error-message" class="callout callout-error hidden">
+        <span class="callout-icon"><%- include('icons/x-circle', { size: 20 }) %></span>
+        <div class="callout-content">
+          <p id="error-text"></p>
+        </div>
+      </div>
+    </form>
+
+    <!-- Privacy Note -->
+    <div class="mt-6 text-center">
+      <p class="text-small" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+        <span>🔒</span>
+        <span>Sem login. Sem dados pessoais. Apenas diversão.</span>
+      </p>
+    </div>
+
+    <!-- Divider -->
+    <div style="margin: 1.5rem 0; height: 1px; background: linear-gradient(90deg, transparent, var(--border-color), transparent);"></div>
+
+    <!-- Host Link -->
+    <div class="text-center">
+      <a href="/host" class="text-caption" style="color: var(--accent-light); text-decoration: none; transition: opacity 0.2s;">
+        Sou facilitador →
+      </a>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script>
+    // Preencher código da URL se existir
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeFromUrl = urlParams.get('code');
+    if (codeFromUrl) {
+      document.getElementById('room-code').value = codeFromUrl.toUpperCase();
+      // Focus no nickname se o código já está preenchido
+      document.getElementById('nickname').focus();
+    }
+
+    // Uppercase automático e validação do código
+    const roomCodeInput = document.getElementById('room-code');
+    roomCodeInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      clearError('room-code');
+    });
+
+    // Limpar erros ao digitar
+    document.getElementById('nickname').addEventListener('input', () => {
+      clearError('nickname');
+    });
+
+    function clearError(field) {
+      const input = document.getElementById(field);
+      const errorEl = document.getElementById(field + '-error');
+      input.classList.remove('input-error');
+      errorEl.classList.add('hidden');
+      document.getElementById('error-message').classList.add('hidden');
+    }
+
+    function showFieldError(field, message) {
+      const input = document.getElementById(field);
+      const errorEl = document.getElementById(field + '-error');
+      input.classList.add('input-error');
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+      input.focus();
+    }
+
+    function showGeneralError(message) {
+      const errorEl = document.getElementById('error-message');
+      document.getElementById('error-text').textContent = message;
+      errorEl.classList.remove('hidden');
+    }
+
+    function setLoading(loading) {
+      const btn = document.getElementById('btn-join');
+      const btnText = document.getElementById('btn-text');
+      const btnSpinner = document.getElementById('btn-spinner');
+      
+      btn.disabled = loading;
+      btnText.textContent = loading ? 'Entrando...' : 'Entrar na Sala';
+      btnSpinner.classList.toggle('hidden', !loading);
+    }
+
+    // Submit form
+    document.getElementById('join-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const roomCode = document.getElementById('room-code').value.trim().toUpperCase();
+      const nickname = document.getElementById('nickname').value.trim();
+      
+      // Validações
+      if (!roomCode) {
+        showFieldError('room-code', 'Digite o código da sala');
+        return;
+      }
+      
+      if (roomCode.length < 6) {
+        showFieldError('room-code', 'O código deve ter 6 caracteres');
+        return;
+      }
+      
+      if (!nickname) {
+        showFieldError('nickname', 'Digite seu apelido');
+        return;
+      }
+      
+      if (nickname.length < 2) {
+        showFieldError('nickname', 'O apelido deve ter pelo menos 2 caracteres');
+        return;
+      }
+      
+      setLoading(true);
+      
+      try {
+        // Verificar se sala existe
+        const existsRes = await fetch(`/api/rooms/${roomCode}/exists`);
+        const existsData = await existsRes.json();
+        
+        if (!existsData.exists) {
+          showFieldError('room-code', 'Sala não encontrada ou expirada');
+          setLoading(false);
+          return;
+        }
+        
+        // Entrar na sala
+        const joinRes = await fetch(`/api/rooms/${roomCode}/join`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nickname })
+        });
+        
+        const joinData = await joinRes.json();
+        
+        if (!joinRes.ok) {
+          throw new Error(joinData.error || 'Erro ao entrar na sala');
+        }
+        
+        // Salvar playerId e redirecionar
+        sessionStorage.setItem('playerId', joinData.playerId);
+        sessionStorage.setItem('nickname', nickname);
+        
+        window.location.href = `/play/${roomCode}`;
+        
+      } catch (error) {
+        showGeneralError(error.message);
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>

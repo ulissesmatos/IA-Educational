@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="gradient-bg min-h-screen">
+  
+  <!-- Background Decoration -->
+  <div style="position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;">
+    <div style="position: absolute; top: -20%; left: -10%; width: 40%; height: 40%; background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);"></div>
+    <div style="position: absolute; bottom: -20%; right: -10%; width: 50%; height: 50%; background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%);"></div>
+  </div>
+
+  <div class="container container-lg py-8" style="position: relative; z-index: 1;">
+    
+    <!-- Header -->
+    <header class="text-center mb-8 animate-fadeInDown">
+      <div class="animate-float" style="display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-dark)); border-radius: 20px; margin-bottom: 1.5rem; color: white;">
+        <%- include('icons/cpu-chip', { size: 48 }) %>
+      </div>
+      <h1 class="text-display gradient-text mb-2">IA na Educação</h1>
+      <p class="text-caption" style="max-width: 500px; margin: 0 auto;">
+        Ferramentas e recursos para explorar Inteligência Artificial no contexto educacional
+      </p>
+    </header>
+
+    <!-- Main Cards Grid -->
+    <div class="grid gap-6 mb-8 animate-fadeInUp" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 700px; margin: 0 auto; animation-delay: 100ms;">
+      
+      <!-- Card: Jogo IA ou Não -->
+      <a href="/jogo" class="card card-hover" style="text-decoration: none; padding: 2rem;">
+        <div class="flex items-start gap-4">
+          <div style="display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: var(--accent-glow); border-radius: 14px; flex-shrink: 0; color: var(--accent-primary);">
+            <%- include('icons/puzzle-piece', { size: 28 }) %>
+          </div>
+          <div style="flex: 1;">
+            <div class="flex items-center gap-2 mb-2">
+              <h2 class="text-title">IA ou Não?</h2>
+              <span class="badge badge-success">JOGO</span>
+            </div>
+            <p class="text-caption mb-3" style="color: var(--text-secondary);">
+              Quiz interativo para testar se você consegue distinguir conteúdo criado por IA de conteúdo humano.
+            </p>
+            <div class="flex gap-2 flex-wrap">
+              <span class="badge badge-neutral" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                <%- include('icons/photo', { size: 12 }) %> Imagens
+              </span>
+              <span class="badge badge-neutral" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                <%- include('icons/document-text', { size: 12 }) %> Textos
+              </span>
+              <span class="badge badge-neutral" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                <%- include('icons/magnifying-glass', { size: 12 }) %> Alucinações
+              </span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+          <span class="text-small" style="color: var(--accent-primary); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+            Jogar agora <%- include('icons/arrow-right', { size: 14 }) %>
+          </span>
+        </div>
+      </a>
+
+      <!-- Card: Catálogo de IAs -->
+      <a href="/ias" class="card card-hover" style="text-decoration: none; padding: 2rem;">
+        <div class="flex items-start gap-4">
+          <div style="display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: var(--accent-glow); border-radius: 14px; flex-shrink: 0; color: var(--accent-primary);">
+            <%- include('icons/book-open', { size: 28 }) %>
+          </div>
+          <div style="flex: 1;">
+            <div class="flex items-center gap-2 mb-2">
+              <h2 class="text-title">Catálogo de IAs</h2>
+              <span class="badge badge-primary">NOVO</span>
+            </div>
+            <p class="text-caption mb-3" style="color: var(--text-secondary);">
+              Explore ferramentas de IA úteis para educação, organizadas por categoria e modelo de preço.
+            </p>
+            <div class="flex gap-2 flex-wrap">
+              <% categories.slice(0, 3).forEach(function(cat) { %>
+                <span class="badge badge-neutral" style="font-size: 0.75rem;"><%= cat.name %></span>
+              <% }); %>
+              <% if (categories.length > 3) { %>
+                <span class="badge badge-neutral" style="font-size: 0.75rem;">+<%= categories.length - 3 %></span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+          <span class="text-small" style="color: var(--accent-primary); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+            Ver todas as ferramentas <%- include('icons/arrow-right', { size: 14 }) %>
+          </span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Featured Tools Section -->
+    <% if (featuredTools && featuredTools.length > 0) { %>
+    <section class="animate-fadeInUp" style="animation-delay: 200ms;">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-headline" style="display: flex; align-items: center; gap: 8px; color: var(--warning);">
+          <%- include('icons/star', { size: 24 }) %>
+          <span style="color: var(--text-primary);">IAs em Destaque</span>
+        </h2>
+        <a href="/ias" class="btn btn-secondary" style="font-size: 0.875rem; display: inline-flex; align-items: center; gap: 4px;">
+          Ver todas <%- include('icons/arrow-right', { size: 14 }) %>
+        </a>
+      </div>
+      
+      <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+        <% featuredTools.slice(0, 6).forEach(function(tool) { %>
+          <a href="/ias/<%= tool.slug %>" class="card card-hover" style="text-decoration: none; padding: 1.25rem;">
+            <div class="flex items-start gap-3">
+              <% if (tool.logoUrl) { %>
+                <img src="<%= tool.logoUrl %>" alt="<%= tool.name %>" 
+                     style="width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: var(--bg-tertiary); padding: 6px; flex-shrink: 0;"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div style="display: none; width: 44px; height: 44px; border-radius: 10px; background: var(--bg-tertiary); align-items: center; justify-content: center; flex-shrink: 0; color: var(--text-muted);">
+                  <%- include('icons/cpu-chip', { size: 22 }) %>
+                </div>
+              <% } else { %>
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--text-muted);">
+                  <%- include('icons/cpu-chip', { size: 22 }) %>
+                </div>
+              <% } %>
+              <div style="flex: 1; min-width: 0;">
+                <h3 class="text-body" style="font-weight: 600; margin-bottom: 0.25rem;"><%= tool.name %></h3>
+                <p class="text-small" style="color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                  <%= tool.shortDesc %>
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 mt-3">
+              <% if (tool.pricingType === 'FREE') { %>
+                <span class="badge badge-success" style="font-size: 0.7rem; display: inline-flex; align-items: center; gap: 3px; color: var(--success);">
+                  <%- include('icons/check-circle', { size: 12 }) %> Grátis
+                </span>
+              <% } else if (tool.pricingType === 'FREEMIUM') { %>
+                <span class="badge badge-warning" style="font-size: 0.7rem; display: inline-flex; align-items: center; gap: 3px; color: var(--warning);">
+                  <%- include('icons/minus-circle', { size: 12 }) %> Freemium
+                </span>
+              <% } else { %>
+                <span class="badge badge-error" style="font-size: 0.7rem; display: inline-flex; align-items: center; gap: 3px; color: var(--error);">
+                  <%- include('icons/currency-dollar', { size: 12 }) %> Pago
+                </span>
+              <% } %>
+              <span class="badge badge-neutral" style="font-size: 0.7rem;"><%= tool.categoryName %></span>
+            </div>
+          </a>
+        <% }); %>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- Stats Section -->
+    <section class="mt-8 animate-fadeInUp" style="animation-delay: 300ms;">
+      <div class="card" style="padding: 1.5rem;">
+        <div class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); text-align: center;">
+          <div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--accent-primary);">
+              <%= categories.reduce((sum, c) => sum + c.toolCount, 0) %>
+            </div>
+            <div class="text-caption" style="color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 4px;">
+              <%- include('icons/cpu-chip', { size: 14 }) %> Ferramentas
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--success);">
+              <%= stats.FREE + stats.FREEMIUM %>
+            </div>
+            <div class="text-caption" style="color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 4px;">
+              <%- include('icons/check-circle', { size: 14 }) %> Com opção grátis
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--warning);">
+              <%= categories.length %>
+            </div>
+            <div class="text-caption" style="color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 4px;">
+              <%- include('icons/folder', { size: 14 }) %> Categorias
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--accent-dark);">
+              <%= featuredTools.length %>
+            </div>
+            <div class="text-caption" style="color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 4px;">
+              <%- include('icons/star', { size: 14 }) %> Em destaque
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories Quick Access -->
+    <section class="mt-8 animate-fadeInUp" style="animation-delay: 400ms;">
+      <h2 class="text-headline mb-4" style="display: flex; align-items: center; gap: 8px; color: var(--accent-primary);">
+        <%- include('icons/folder', { size: 24 }) %>
+        <span style="color: var(--text-primary);">Categorias</span>
+      </h2>
+      <div class="flex gap-3 flex-wrap">
+        <% categories.forEach(function(cat) { %>
+          <a href="/ias?categoria=<%= cat.slug %>" class="card card-hover" style="text-decoration: none; padding: 1rem 1.25rem; display: inline-flex; align-items: center; gap: 0.75rem;">
+            <span class="text-body" style="font-weight: 500;"><%= cat.name %></span>
+            <span class="badge badge-neutral"><%= cat.toolCount %></span>
+          </a>
+        <% }); %>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center">
+      <p class="text-caption" style="color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <%- include('icons/academic-cap', { size: 16 }) %>
+        Desenvolvido para a oficina "IA na Educação"
+      </p>
+    </footer>
+  </div>
+
+  <style>
+    .grid {
+      display: grid;
+    }
+  </style>
+</body>
+</html>

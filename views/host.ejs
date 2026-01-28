@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- QR Code library - usando CDN alternativo -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="gradient-bg min-h-screen p-4">
+  
+  <!-- Background Decoration -->
+  <div style="position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;">
+    <div style="position: absolute; top: -20%; left: -10%; width: 40%; height: 40%; background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);"></div>
+    <div style="position: absolute; bottom: -20%; right: -10%; width: 50%; height: 50%; background: radial-gradient(circle, rgba(96, 165, 250, 0.06) 0%, transparent 70%);"></div>
+  </div>
+
+  <div class="container container-lg" style="position: relative; z-index: 1;">
+    
+    <!-- Header -->
+    <header class="text-center mb-8">
+      <div class="flex items-center justify-center gap-3 mb-2">
+        <span style="color: var(--accent-light);"><%- include('icons/cpu-chip', { size: 40 }) %></span>
+        <h1 class="text-display gradient-text">IA ou Não?</h1>
+      </div>
+      <p class="text-caption">Painel do Facilitador</p>
+    </header>
+
+    <!-- ==================== ROOM ACTIVE SECTION ==================== -->
+    <div id="room-section">
+      
+      <!-- Connection Status -->
+      <div id="connection-status" class="callout callout-warning mb-6 animate-fadeInUp">
+        <span class="callout-icon"><%- include('icons/arrow-path', { size: 20 }) %></span>
+        <div class="callout-content">
+          <p>Conectando ao servidor...</p>
+        </div>
+      </div>
+      
+      <!-- Room Info Bar -->
+      <div class="card mb-6 animate-fadeInUp" style="padding: 1.5rem;">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <p class="text-small mb-1">Código da Sala</p>
+            <p id="room-code" style="font-size: 2.5rem; font-weight: 800; font-family: monospace; color: var(--accent-light); letter-spacing: 0.1em;"><%= roomCode %></p>
+          </div>
+          <div class="text-right">
+            <p class="text-small mb-1">Status</p>
+            <span id="room-status" class="badge badge-neutral" style="font-size: 0.875rem; padding: 0.5rem 1rem;">Carregando...</span>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);" class="flex gap-4 flex-wrap">
+          <a id="link-screen" href="/screen/<%= roomCode %>" target="_blank" class="btn btn-secondary" style="flex: 1; min-width: 180px; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <%- include('icons/tv', { size: 20 }) %> Tela do Projetor
+          </a>
+          <a id="link-join" href="/join?code=<%= roomCode %>" target="_blank" class="btn btn-secondary" style="flex: 1; min-width: 180px; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <%- include('icons/device-phone-mobile', { size: 20 }) %> Link para Participantes
+          </a>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="host-grid">
+        
+        <!-- Left Column: Controls + Question -->
+        <div class="space-y-6">
+          
+          <!-- Control Panel -->
+          <div class="card animate-fadeInUp" style="padding: 1.5rem; animation-delay: 100ms;">
+            <h3 class="text-title mb-4 flex items-center gap-2">
+              <%- include('icons/adjustments-horizontal', { size: 24 }) %> Controles
+            </h3>
+            
+            <div class="control-buttons mb-4">
+              <button id="btn-start" class="btn btn-success" disabled style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <%- include('icons/play', { size: 18 }) %> Iniciar Jogo
+              </button>
+              <button id="btn-reveal" class="btn btn-warning" disabled style="display: none; align-items: center; gap: 0.5rem;">
+                <%- include('icons/cursor-arrow-rays', { size: 18 }) %> Revelar
+              </button>
+              <button id="btn-next" class="btn btn-primary" disabled style="display: none; align-items: center; gap: 0.5rem;">
+                <%- include('icons/arrow-right', { size: 18 }) %> Próxima
+              </button>
+              <button id="btn-end" class="btn btn-danger" disabled style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <%- include('icons/stop', { size: 18 }) %> Encerrar
+              </button>
+            </div>
+            
+            <div id="control-message" class="callout callout-info">
+              <span class="callout-icon"><%- include('icons/light-bulb', { size: 20 }) %></span>
+              <div class="callout-content">
+                <p id="control-message-text" class="text-caption" style="color: var(--text-secondary);">Conectando...</p>
+              </div>
+            </div>
+            
+            <!-- Answered Progress -->
+            <div id="answered-info" class="mt-4" style="display: none;">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-small">Respostas recebidas</span>
+                <span class="text-caption"><span id="answered-count">0</span> de <span id="total-players">0</span></span>
+              </div>
+              <div class="progress-bar">
+                <div id="answered-progress" class="progress-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Question -->
+          <div id="question-section" class="card animate-fadeInUp" style="padding: 1.5rem; animation-delay: 150ms; display: none;">
+            <div class="flex justify-between items-start mb-4">
+              <h3 class="text-title flex items-center gap-2">
+                <%- include('icons/question-mark-circle', { size: 24 }) %> Pergunta Atual
+              </h3>
+              <span id="question-counter" class="badge badge-primary"></span>
+            </div>
+            
+            <div id="question-image" class="mb-4" style="display: none;">
+              <img id="question-img" src="" alt="Imagem da pergunta" 
+                   style="width: 100%; max-height: 200px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary);">
+            </div>
+            
+            <p id="question-prompt" class="text-body mb-4" style="white-space: pre-line; color: var(--text-secondary);"></p>
+            
+            <div id="question-options" class="space-y-2"></div>
+            
+            <!-- Result Section (after reveal) -->
+            <div id="result-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); display: none;">
+              <div class="callout callout-success mb-4">
+                <span class="callout-icon"><%- include('icons/check-circle', { size: 20 }) %></span>
+                <div class="callout-content">
+                  <p class="callout-title" style="color: var(--success-light);">Resposta Correta</p>
+                  <p id="correct-answer" style="font-weight: 600;"></p>
+                </div>
+              </div>
+              
+              <h4 class="text-caption mb-3" style="text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;"><%- include('icons/chart-bar', { size: 16 }) %> Estatísticas</h4>
+              <div id="stats-section" class="space-y-2 mb-4"></div>
+              
+              <div class="callout callout-info">
+                <span class="callout-icon"><%- include('icons/light-bulb', { size: 20 }) %></span>
+                <div class="callout-content">
+                  <p class="callout-title">Explicação</p>
+                  <p id="explanation" class="text-caption" style="color: var(--text-secondary);"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Participants + Ranking + QR -->
+        <div class="right-column">
+          
+          <!-- Participants -->
+          <div class="card animate-fadeInUp" style="padding: 1.5rem; animation-delay: 200ms;">
+            <h3 class="text-title mb-4 flex items-center justify-between">
+              <span class="flex items-center gap-2">
+                <%- include('icons/users', { size: 24 }) %> Participantes
+              </span>
+              <span id="player-count" class="badge badge-neutral">0</span>
+            </h3>
+            <div id="players-list" class="space-y-2" style="max-height: 300px; overflow-y: auto;">
+              <p class="text-caption text-center" style="padding: 2rem 0; color: var(--text-muted);">
+                Nenhum participante ainda
+              </p>
+            </div>
+          </div>
+          
+          <!-- Ranking -->
+          <div class="card animate-fadeInUp" style="padding: 1.5rem; animation-delay: 250ms;">
+            <h3 class="text-title mb-4 flex items-center gap-2">
+              <%- include('icons/trophy', { size: 24 }) %> Top 5
+            </h3>
+            <div id="ranking-list" class="space-y-2">
+              <p class="text-caption text-center" style="padding: 2rem 0; color: var(--text-muted);">
+                Ranking aparecerá após as perguntas
+              </p>
+            </div>
+          </div>
+          
+          <!-- QR Code -->
+          <div class="card animate-fadeInUp" style="padding: 1.5rem; animation-delay: 300ms;">
+            <h3 class="text-title mb-4 flex items-center gap-2">
+              <%- include('icons/qr-code', { size: 24 }) %> QR Code
+            </h3>
+            <div class="text-center">
+              <div id="qr-container" class="qr-container" style="display: inline-block; margin-bottom: 1rem;"></div>
+              <p class="text-small" style="color: var(--text-muted);">Escaneie para entrar na sala</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Game Modal -->
+  <div id="end-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" style="display: flex; align-items: center; gap: 0.5rem;"><%- include('icons/stop', { size: 24 }) %> Encerrar Sala</h3>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza que deseja encerrar a sala? Isso finalizará o jogo para todos os participantes e os dados serão removidos.</p>
+      </div>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn btn-secondary">Cancelar</button>
+        <button id="modal-confirm" class="btn btn-danger">Encerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Layout responsivo para host */
+    .host-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    
+    @media (min-width: 1024px) {
+      .host-grid {
+        grid-template-columns: 1.3fr 1fr;
+      }
+    }
+    
+    .right-column {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    
+    @media (min-width: 640px) and (max-width: 1023px) {
+      .right-column {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .right-column {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Botões de controle em mobile */
+    .control-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    
+    @media (min-width: 640px) {
+      .control-buttons {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      
+      .control-buttons .btn {
+        flex: 1;
+        min-width: 140px;
+      }
+    }
+    
+    /* QR Container responsivo */
+    .qr-container canvas {
+      max-width: 100%;
+      height: auto !important;
+    }
+  </style>
+
+  <script>
+    // Room code from server
+    const ROOM_CODE = '<%= roomCode %>';
+    
+    // State
+    let socket = null;
+    let isConnected = false;
+    let currentState = null;
+
+    // DOM Elements
+    const connectionStatus = document.getElementById('connection-status');
+    const roomStatusEl = document.getElementById('room-status');
+    const controlMessageText = document.getElementById('control-message-text');
+    const questionSection = document.getElementById('question-section');
+    const resultSection = document.getElementById('result-section');
+    const answeredInfo = document.getElementById('answered-info');
+    const endModal = document.getElementById('end-modal');
+    
+    // Buttons
+    const btnStart = document.getElementById('btn-start');
+    const btnReveal = document.getElementById('btn-reveal');
+    const btnNext = document.getElementById('btn-next');
+    const btnEnd = document.getElementById('btn-end');
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      generateQRCode();
+      connectSocket();
+    });
+
+    // Generate QR Code
+    function generateQRCode() {
+      const baseUrl = window.location.origin;
+      const joinUrl = `${baseUrl}/join?code=${ROOM_CODE}`;
+      const container = document.getElementById('qr-container');
+      
+      // Limpar container
+      container.innerHTML = '';
+      
+      // Usar qrcodejs library
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(container, {
+          text: joinUrl,
+          width: 160,
+          height: 160,
+          colorDark: '#0F172A',
+          colorLight: '#FFFFFF',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } else {
+        // Fallback: mostrar link como texto
+        container.innerHTML = `<p style="font-size: 0.875rem; word-break: break-all;">${joinUrl}</p>`;
+        console.warn('QRCode library não carregada');
+      }
+    }
+
+    // Connect Socket.io
+    function connectSocket() {
+      socket = io();
+      
+      socket.on('connect', () => {
+        console.log('🔌 Socket conectado');
+        isConnected = true;
+        connectionStatus.style.display = 'none';
+        
+        // Join as host
+        socket.emit('host:join', { roomCode: ROOM_CODE });
+      });
+      
+      socket.on('disconnect', () => {
+        console.log('🔌 Socket desconectado');
+        isConnected = false;
+        connectionStatus.style.display = 'block';
+        connectionStatus.querySelector('.callout-content p').textContent = 'Conexão perdida. Tentando reconectar...';
+        connectionStatus.className = 'callout callout-error mb-6 animate-fadeInUp';
+        disableAllButtons();
+      });
+      
+      socket.on('room:state', (state) => {
+        console.log('📡 Estado recebido:', state);
+        currentState = state;
+        updateUI(state);
+      });
+      
+      socket.on('player:joined', (player) => {
+        console.log('👤 Player entrou:', player.nickname);
+        // State will be updated via room:state event
+      });
+      
+      socket.on('player:answered', (data) => {
+        updateAnsweredProgress(data.answeredCount, data.totalPlayers);
+      });
+      
+      socket.on('game:ended', (data) => {
+        console.log('🏁 Jogo encerrado');
+        // Redirect to create page after game ends
+        setTimeout(() => {
+          window.location.href = '/host';
+        }, 2000);
+      });
+      
+      socket.on('error', (data) => {
+        console.error('❌ Erro:', data.message);
+        alert('Erro: ' + data.message);
+      });
+    }
+
+    // Disable all buttons
+    function disableAllButtons() {
+      btnStart.disabled = true;
+      btnReveal.disabled = true;
+      btnNext.disabled = true;
+      btnEnd.disabled = true;
+    }
+
+    // Update UI based on state
+    function updateUI(state) {
+      // Status badge
+      const statusMap = {
+        lobby: { text: '⏳ Aguardando', class: 'badge-neutral' },
+        asking: { text: '❓ Pergunta Ativa', class: 'badge-warning' },
+        revealed: { text: '✅ Resultado', class: 'badge-success' },
+        ended: { text: '🏁 Encerrado', class: 'badge-error' }
+      };
+      const statusInfo = statusMap[state.status] || { text: state.status, class: 'badge-neutral' };
+      roomStatusEl.textContent = statusInfo.text;
+      roomStatusEl.className = `badge ${statusInfo.class}`;
+      
+      // Update buttons visibility and state based on room status
+      updateButtons(state);
+      
+      // Update control message
+      updateControlMessage(state);
+      
+      // Update players list
+      updatePlayersList(state.players);
+      
+      // Update ranking
+      updateRanking(state.ranking);
+      
+      // Update question section
+      updateQuestion(state);
+      
+      // Update answered progress
+      if (state.status === 'asking') {
+        answeredInfo.style.display = 'block';
+        updateAnsweredProgress(state.answeredCount, state.totalPlayers);
+      } else {
+        answeredInfo.style.display = 'none';
+      }
+    }
+
+    // Update buttons based on state
+    function updateButtons(state) {
+      const hasPlayers = state.players && state.players.length > 0;
+      
+      // Visibility - use display instead of hidden class for better control
+      btnStart.style.display = state.status === 'lobby' ? 'inline-flex' : 'none';
+      btnReveal.style.display = state.status === 'asking' ? 'inline-flex' : 'none';
+      btnNext.style.display = state.status === 'revealed' ? 'inline-flex' : 'none';
+      btnEnd.style.display = 'inline-flex'; // Always visible
+      
+      // Enable/disable based on conditions
+      btnStart.disabled = !(state.status === 'lobby' && hasPlayers && isConnected);
+      btnReveal.disabled = !(state.status === 'asking' && isConnected);
+      btnNext.disabled = !(state.status === 'revealed' && isConnected);
+      btnEnd.disabled = !isConnected;
+      
+      console.log('🔘 Botões atualizados:', {
+        status: state.status,
+        hasPlayers,
+        isConnected,
+        btnStartDisabled: btnStart.disabled,
+        playersCount: state.players?.length
+      });
+    }
+
+    // Update control message
+    function updateControlMessage(state) {
+      const hasPlayers = state.players && state.players.length > 0;
+      
+      switch (state.status) {
+        case 'lobby':
+          if (hasPlayers) {
+            controlMessageText.textContent = `${state.players.length} participante(s) na sala. Clique em "Iniciar Jogo" quando todos estiverem prontos.`;
+          } else {
+            controlMessageText.textContent = 'Aguardando participantes entrarem na sala...';
+          }
+          break;
+        case 'asking':
+          controlMessageText.textContent = 'Pergunta liberada! Aguarde as respostas e clique em "Revelar Resultado".';
+          break;
+        case 'revealed':
+          controlMessageText.textContent = 'Resultado revelado! Clique em "Próxima Pergunta" para continuar.';
+          break;
+        case 'ended':
+          controlMessageText.textContent = 'Jogo encerrado. Redirecionando...';
+          break;
+        default:
+          controlMessageText.textContent = 'Conectado.';
+      }
+    }
+
+    // Update players list
+    function updatePlayersList(players) {
+      document.getElementById('player-count').textContent = players.length;
+      const playersList = document.getElementById('players-list');
+      
+      if (players.length === 0) {
+        playersList.innerHTML = `
+          <p class="text-caption text-center" style="padding: 2rem 0; color: var(--text-muted);">
+            Nenhum participante ainda
+          </p>
+        `;
+      } else {
+        playersList.innerHTML = players.map(p => `
+          <div class="ranking-item">
+            <div class="player-avatar">${p.nickname.charAt(0).toUpperCase()}</div>
+            <span class="ranking-name">${escapeHtml(p.nickname)}</span>
+            <span class="ranking-score">${p.score} pts</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Update ranking
+    function updateRanking(ranking) {
+      const rankingList = document.getElementById('ranking-list');
+      const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+      
+      if (ranking && ranking.length > 0) {
+        rankingList.innerHTML = ranking.slice(0, 5).map((p, i) => {
+          let rankClass = '';
+          if (i === 0) rankClass = 'gold';
+          else if (i === 1) rankClass = 'silver';
+          else if (i === 2) rankClass = 'bronze';
+          
+          return `
+            <div class="ranking-item ${rankClass}">
+              <span class="ranking-position">${medals[i]}</span>
+              <span class="ranking-name">${escapeHtml(p.nickname)}</span>
+              <span class="ranking-score">${p.score} pts</span>
+            </div>
+          `;
+        }).join('');
+      } else {
+        rankingList.innerHTML = `
+          <p class="text-caption text-center" style="padding: 2rem 0; color: var(--text-muted);">
+            Ranking aparecerá após as perguntas
+          </p>
+        `;
+      }
+    }
+
+    // Update question section
+    function updateQuestion(state) {
+      const q = state.currentQuestion || state.revealedQuestion;
+      
+      if (!q) {
+        questionSection.style.display = 'none';
+        return;
+      }
+      
+      questionSection.style.display = 'block';
+      
+      document.getElementById('question-counter').textContent = `${q.index + 1} / ${q.total}`;
+      document.getElementById('question-prompt').textContent = q.prompt;
+      
+      // Image
+      const imgSection = document.getElementById('question-image');
+      if (q.imageUrl) {
+        imgSection.style.display = 'block';
+        document.getElementById('question-img').src = q.imageUrl;
+      } else {
+        imgSection.style.display = 'none';
+      }
+      
+      // Options
+      const optionsEl = document.getElementById('question-options');
+      optionsEl.innerHTML = q.options.map((opt, i) => {
+        const isCorrect = state.revealedQuestion && i === state.revealedQuestion.correctOption;
+        return `
+          <div class="btn-option ${isCorrect ? 'correct' : ''}" style="cursor: default;">
+            <span class="option-letter" style="${isCorrect ? 'background: var(--success);' : ''}">${String.fromCharCode(65 + i)}</span>
+            <span style="flex: 1;">${escapeHtml(opt)}</span>
+            ${isCorrect ? '<span>✓</span>' : ''}
+          </div>
+        `;
+      }).join('');
+      
+      // Revealed result
+      if (state.revealedQuestion) {
+        resultSection.style.display = 'block';
+        document.getElementById('correct-answer').textContent = 
+          `${String.fromCharCode(65 + state.revealedQuestion.correctOption)}) ${state.revealedQuestion.options[state.revealedQuestion.correctOption]}`;
+        document.getElementById('explanation').textContent = state.revealedQuestion.explanation;
+        
+        // Stats
+        const statsEl = document.getElementById('stats-section');
+        statsEl.innerHTML = state.revealedQuestion.stats.map((s, i) => {
+          const isCorrect = i === state.revealedQuestion.correctOption;
+          return `
+            <div class="stat-bar-container">
+              <span class="stat-bar-label" style="${isCorrect ? 'background: var(--success);' : ''}">${String.fromCharCode(65 + i)}</span>
+              <div class="stat-bar-track">
+                <div class="stat-bar-fill ${isCorrect ? 'correct' : ''}" style="width: ${s.percentage}%;"></div>
+              </div>
+              <span class="stat-bar-percentage">${s.percentage}%</span>
+              <span class="stat-bar-count">(${s.count})</span>
+            </div>
+          `;
+        }).join('');
+      } else {
+        resultSection.style.display = 'none';
+      }
+    }
+
+    // Update answered progress
+    function updateAnsweredProgress(answeredCount, totalPlayers) {
+      document.getElementById('answered-count').textContent = answeredCount;
+      document.getElementById('total-players').textContent = totalPlayers;
+      const percentage = totalPlayers > 0 ? (answeredCount / totalPlayers) * 100 : 0;
+      document.getElementById('answered-progress').style.width = percentage + '%';
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ==================== HOST ACTIONS ====================
+
+    btnStart.addEventListener('click', () => {
+      if (!socket || !isConnected) {
+        alert('Erro: Conexão não estabelecida.');
+        return;
+      }
+      btnStart.disabled = true;
+      socket.emit('host:action', { roomCode: ROOM_CODE, action: 'start' });
+    });
+
+    btnReveal.addEventListener('click', () => {
+      if (!socket || !isConnected) {
+        alert('Erro: Conexão não estabelecida.');
+        return;
+      }
+      btnReveal.disabled = true;
+      socket.emit('host:action', { roomCode: ROOM_CODE, action: 'reveal' });
+    });
+
+    btnNext.addEventListener('click', () => {
+      if (!socket || !isConnected) {
+        alert('Erro: Conexão não estabelecida.');
+        return;
+      }
+      btnNext.disabled = true;
+      socket.emit('host:action', { roomCode: ROOM_CODE, action: 'next' });
+    });
+
+    btnEnd.addEventListener('click', () => {
+      if (!socket || !isConnected) {
+        alert('Erro: Conexão não estabelecida.');
+        return;
+      }
+      endModal.classList.add('active');
+    });
+
+    // ==================== MODAL ACTIONS ====================
+
+    document.getElementById('modal-cancel').addEventListener('click', () => {
+      endModal.classList.remove('active');
+    });
+
+    document.getElementById('modal-confirm').addEventListener('click', () => {
+      if (!socket || !isConnected) {
+        alert('Erro: Conexão não estabelecida.');
+        return;
+      }
+      socket.emit('host:action', { roomCode: ROOM_CODE, action: 'end' });
+      endModal.classList.remove('active');
+    });
+
+    // Close modal on overlay click
+    endModal.addEventListener('click', (e) => {
+      if (e.target === endModal) {
+        endModal.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>

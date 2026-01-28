@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="gradient-bg min-h-screen">
+  
+  <!-- Background Decoration -->
+  <div style="position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;">
+    <div style="position: absolute; top: -20%; left: -10%; width: 40%; height: 40%; background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);"></div>
+    <div style="position: absolute; bottom: -20%; right: -10%; width: 50%; height: 50%; background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%);"></div>
+  </div>
+
+  <div class="container container-lg py-6" style="position: relative; z-index: 1;">
+    
+    <!-- Breadcrumb -->
+    <nav class="mb-6 animate-fadeInDown">
+      <div class="flex items-center gap-2 text-small" style="color: var(--text-muted);">
+        <a href="/" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+          <%- include('icons/home', { size: 14 }) %> Início
+        </a>
+        <span style="color: var(--text-muted);"><%- include('icons/chevron-right', { size: 12 }) %></span>
+        <a href="/ias" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+          <%- include('icons/book-open', { size: 14 }) %> Catálogo
+        </a>
+        <% if (tool.category) { %>
+          <span style="color: var(--text-muted);"><%- include('icons/chevron-right', { size: 12 }) %></span>
+          <a href="/ias?categoria=<%= tool.category.slug %>" style="color: var(--text-muted); text-decoration: none;">
+            <%= tool.category.name %>
+          </a>
+        <% } %>
+        <span style="color: var(--text-muted);"><%- include('icons/chevron-right', { size: 12 }) %></span>
+        <span style="color: var(--text-primary);"><%= tool.name %></span>
+      </div>
+    </nav>
+
+    <!-- Tool Header -->
+    <header class="card mb-6 animate-fadeInUp" style="padding: 2rem;">
+      <div class="flex items-start gap-4 flex-wrap">
+        <!-- Logo -->
+        <% if (tool.logoUrl) { %>
+          <img src="<%= tool.logoUrl %>" alt="<%= tool.name %>" 
+               style="width: 80px; height: 80px; border-radius: 16px; object-fit: contain; background: var(--bg-tertiary); padding: 8px; flex-shrink: 0;"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div style="display: none; width: 80px; height: 80px; border-radius: 16px; background: var(--bg-tertiary); align-items: center; justify-content: center; flex-shrink: 0; color: var(--text-muted);">
+            <%- include('icons/cpu-chip', { size: 40 }) %>
+          </div>
+        <% } else { %>
+          <div style="width: 80px; height: 80px; border-radius: 16px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--text-muted);">
+            <%- include('icons/cpu-chip', { size: 40 }) %>
+          </div>
+        <% } %>
+
+        <!-- Info -->
+        <div style="flex: 1; min-width: 250px;">
+          <div class="flex items-center gap-3 mb-2 flex-wrap">
+            <h1 class="text-display" style="margin: 0;"><%= tool.name %></h1>
+            <% if (tool.isFeatured) { %>
+              <span class="badge badge-primary" style="display: inline-flex; align-items: center; gap: 4px;">
+                <%- include('icons/star', { size: 14 }) %> Destaque
+              </span>
+            <% } %>
+          </div>
+          
+          <div class="flex items-center gap-2 mb-3 flex-wrap">
+            <% if (tool.pricingType === 'FREE') { %>
+              <span class="badge badge-success" style="display: inline-flex; align-items: center; gap: 4px;">
+                <%- include('icons/check-circle', { size: 14 }) %> Grátis
+              </span>
+            <% } else if (tool.pricingType === 'FREEMIUM') { %>
+              <span class="badge badge-warning" style="display: inline-flex; align-items: center; gap: 4px;">
+                <%- include('icons/minus-circle', { size: 14 }) %> Freemium
+              </span>
+            <% } else { %>
+              <span class="badge badge-error" style="display: inline-flex; align-items: center; gap: 4px;">
+                <%- include('icons/currency-dollar', { size: 14 }) %> Pago
+              </span>
+            <% } %>
+            <% if (tool.category) { %>
+              <a href="/ias?categoria=<%= tool.category.slug %>" class="badge badge-neutral" style="text-decoration: none;">
+                <%= tool.category.name %>
+              </a>
+            <% } %>
+          </div>
+
+          <p class="text-body" style="color: var(--text-secondary); margin-bottom: 1rem;">
+            <%= tool.shortDesc %>
+          </p>
+
+          <a href="<%= tool.url %>" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px;">
+            <%- include('icons/arrow-top-right-on-square', { size: 18 }) %> Acessar <%= tool.name %>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid gap-6" style="grid-template-columns: 1fr 320px;">
+      
+      <!-- Main Content -->
+      <div>
+        <!-- Description -->
+        <section class="card mb-6 animate-fadeInUp" style="padding: 1.5rem; animation-delay: 100ms;">
+          <h2 class="text-headline mb-3" style="display: flex; align-items: center; gap: 8px; color: var(--accent-primary);">
+            <%- include('icons/document-text', { size: 24 }) %>
+            <span style="color: var(--text-primary);">Descrição</span>
+          </h2>
+          <p class="text-body" style="color: var(--text-secondary); line-height: 1.7; white-space: pre-line;">
+            <%= tool.description %>
+          </p>
+        </section>
+
+        <!-- Features -->
+        <% if (tool.features && tool.features.length > 0) { %>
+        <section class="card mb-6 animate-fadeInUp" style="padding: 1.5rem; animation-delay: 150ms;">
+          <h2 class="text-headline mb-3" style="display: flex; align-items: center; gap: 8px; color: var(--accent-primary);">
+            <%- include('icons/sparkles', { size: 24 }) %>
+            <span style="color: var(--text-primary);">Principais Recursos</span>
+          </h2>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            <% tool.features.forEach(function(feature) { %>
+              <li class="flex items-start gap-2 mb-2" style="color: var(--accent-primary);">
+                <%- include('icons/check', { size: 16 }) %>
+                <span class="text-body" style="color: var(--text-secondary);"><%= feature %></span>
+              </li>
+            <% }); %>
+          </ul>
+        </section>
+        <% } %>
+
+        <!-- Use Cases for Education -->
+        <% if (tool.useCases && tool.useCases.length > 0) { %>
+        <section class="card mb-6 animate-fadeInUp" style="padding: 1.5rem; animation-delay: 200ms;">
+          <h2 class="text-headline mb-3" style="display: flex; align-items: center; gap: 8px; color: var(--accent-primary);">
+            <%- include('icons/academic-cap', { size: 24 }) %>
+            <span style="color: var(--text-primary);">Usos na Educação</span>
+          </h2>
+          <div class="grid gap-3" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+            <% tool.useCases.forEach(function(useCase) { %>
+              <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--accent-primary);">
+                <span class="text-body"><%= useCase %></span>
+              </div>
+            <% }); %>
+          </div>
+        </section>
+        <% } %>
+
+        <!-- Pros and Cons -->
+        <% if ((tool.pros && tool.pros.length > 0) || (tool.cons && tool.cons.length > 0)) { %>
+        <div class="grid gap-4 mb-6" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+          <% if (tool.pros && tool.pros.length > 0) { %>
+          <section class="card animate-fadeInUp" style="padding: 1.5rem; animation-delay: 250ms; border-left: 3px solid var(--success);">
+            <h2 class="text-title mb-3" style="display: flex; align-items: center; gap: 8px; color: var(--success);">
+              <%- include('icons/hand-thumb-up', { size: 20 }) %>
+              Pontos Positivos
+            </h2>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <% tool.pros.forEach(function(pro) { %>
+                <li class="flex items-start gap-2 mb-2" style="color: var(--success);">
+                  <%- include('icons/check', { size: 14 }) %>
+                  <span class="text-body" style="color: var(--text-secondary);"><%= pro %></span>
+                </li>
+              <% }); %>
+            </ul>
+          </section>
+          <% } %>
+
+          <% if (tool.cons && tool.cons.length > 0) { %>
+          <section class="card animate-fadeInUp" style="padding: 1.5rem; animation-delay: 300ms; border-left: 3px solid var(--error);">
+            <h2 class="text-title mb-3" style="display: flex; align-items: center; gap: 8px; color: var(--error);">
+              <%- include('icons/hand-thumb-down', { size: 20 }) %>
+              Pontos de Atenção
+            </h2>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <% tool.cons.forEach(function(con) { %>
+                <li class="flex items-start gap-2 mb-2" style="color: var(--error);">
+                  <%- include('icons/x-mark', { size: 14 }) %>
+                  <span class="text-body" style="color: var(--text-secondary);"><%= con %></span>
+                </li>
+              <% }); %>
+            </ul>
+          </section>
+          <% } %>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Sidebar -->
+      <aside>
+        <!-- Pricing Details -->
+        <section class="card mb-4 animate-fadeInUp" style="padding: 1.25rem; animation-delay: 150ms;">
+          <h3 class="text-title mb-3" style="display: flex; align-items: center; gap: 8px;">
+            <%- include('icons/currency-dollar', { size: 20, className: 'icon-primary' }) %>
+            Preços
+          </h3>
+          <div class="mb-3">
+            <% if (tool.pricingType === 'FREE') { %>
+              <span class="badge badge-success" style="font-size: 0.875rem; padding: 0.5rem 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                <%- include('icons/check-circle', { size: 16 }) %> Totalmente Grátis
+              </span>
+            <% } else if (tool.pricingType === 'FREEMIUM') { %>
+              <span class="badge badge-warning" style="font-size: 0.875rem; padding: 0.5rem 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                <%- include('icons/minus-circle', { size: 16 }) %> Freemium
+              </span>
+            <% } else { %>
+              <span class="badge badge-error" style="font-size: 0.875rem; padding: 0.5rem 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                <%- include('icons/currency-dollar', { size: 16 }) %> Pago
+              </span>
+            <% } %>
+          </div>
+          <% if (tool.pricingDetails) { %>
+            <p class="text-small" style="color: var(--text-muted); line-height: 1.6;">
+              <%= tool.pricingDetails %>
+            </p>
+          <% } %>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="card mb-4 animate-fadeInUp" style="padding: 1.25rem; animation-delay: 200ms;">
+          <h3 class="text-title mb-3" style="display: flex; align-items: center; gap: 8px;">
+            <%- include('icons/rocket-launch', { size: 20, className: 'icon-primary' }) %>
+            Ações Rápidas
+          </h3>
+          <div class="flex flex-col gap-2">
+            <a href="<%= tool.url %>" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              Acessar Ferramenta <%- include('icons/arrow-top-right-on-square', { size: 16 }) %>
+            </a>
+            <% if (tool.category) { %>
+              <a href="/ias?categoria=<%= tool.category.slug %>" class="btn btn-secondary" style="text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <%- include('icons/folder', { size: 16 }) %> Ver categoria
+              </a>
+            <% } %>
+            <a href="/ias" class="btn btn-secondary" style="text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <%- include('icons/arrow-left', { size: 16 }) %> Voltar ao catálogo
+            </a>
+          </div>
+        </section>
+
+        <!-- Category Info -->
+        <% if (tool.category) { %>
+        <section class="card mb-4 animate-fadeInUp" style="padding: 1.25rem; animation-delay: 250ms;">
+          <h3 class="text-title mb-3" style="display: flex; align-items: center; gap: 8px;">
+            <%- include('icons/folder', { size: 20, className: 'icon-primary' }) %>
+            Categoria
+          </h3>
+          <p class="text-body mb-3" style="color: var(--text-secondary);">
+            <%= tool.category.description %>
+          </p>
+          <a href="/ias?categoria=<%= tool.category.slug %>" class="text-small" style="color: var(--accent-primary); display: inline-flex; align-items: center; gap: 4px;">
+            Ver todas de <%= tool.category.name %> <%- include('icons/arrow-right', { size: 14 }) %>
+          </a>
+        </section>
+        <% } %>
+      </aside>
+    </div>
+
+    <!-- Related Tools -->
+    <% if (relatedTools && relatedTools.length > 0) { %>
+    <section class="mt-8 animate-fadeInUp" style="animation-delay: 350ms;">
+      <h2 class="text-headline mb-4" style="display: flex; align-items: center; gap: 8px; color: var(--accent-primary);">
+        <%- include('icons/link', { size: 24 }) %>
+        <span style="color: var(--text-primary);">Ferramentas Relacionadas</span>
+      </h2>
+      <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+        <% relatedTools.forEach(function(related) { %>
+          <a href="/ias/<%= related.slug %>" class="card card-hover" style="text-decoration: none; padding: 1.25rem;">
+            <div class="flex items-start gap-3">
+              <% if (related.logoUrl) { %>
+                <img src="<%= related.logoUrl %>" alt="<%= related.name %>" 
+                     style="width: 40px; height: 40px; border-radius: 8px; object-fit: contain; background: var(--bg-tertiary); padding: 4px;"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div style="display: none; width: 40px; height: 40px; border-radius: 8px; background: var(--bg-tertiary); align-items: center; justify-content: center; color: var(--text-muted);">
+                  <%- include('icons/cpu-chip', { size: 20 }) %>
+                </div>
+              <% } else { %>
+                <div style="width: 40px; height: 40px; border-radius: 8px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                  <%- include('icons/cpu-chip', { size: 20 }) %>
+                </div>
+              <% } %>
+              <div style="flex: 1; min-width: 0;">
+                <h3 class="text-body" style="font-weight: 600; margin-bottom: 0.25rem;"><%= related.name %></h3>
+                <p class="text-small" style="color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                  <%= related.shortDesc %>
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 mt-3">
+              <% if (related.pricingType === 'FREE') { %>
+                <span class="badge badge-success" style="font-size: 0.7rem; display: inline-flex; align-items: center; gap: 3px;">
+                  <%- include('icons/check-circle', { size: 12 }) %> Grátis
+                </span>
+              <% } else if (related.pricingType === 'FREEMIUM') { %>
+                <span class="badge badge-warning" style="font-size: 0.7rem; display: inline-flex; align-items: center; gap: 3px;">
+                  <%- include('icons/minus-circle', { size: 12 }) %> Freemium
+                </span>
+              <% } else { %>
+                <span class="badge badge-error" style="font-size: 0.7rem; display: inline-flex; align-items: center; gap: 3px;">
+                  <%- include('icons/currency-dollar', { size: 12 }) %> Pago
+                </span>
+              <% } %>
+            </div>
+          </a>
+        <% }); %>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center">
+      <div class="flex justify-center gap-4">
+        <a href="/ias" class="text-caption" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+          <%- include('icons/book-open', { size: 16 }) %> Catálogo
+        </a>
+        <a href="/" class="text-caption" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+          <%- include('icons/home', { size: 16 }) %> Início
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <style>
+    .grid {
+      display: grid;
+    }
+    .flex-col {
+      flex-direction: column;
+    }
+    
+    /* Responsive sidebar */
+    @media (max-width: 768px) {
+      .grid[style*="1fr 320px"] {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
+</body>
+</html>

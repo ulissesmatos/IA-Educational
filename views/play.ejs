@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="gradient-bg min-h-screen p-4">
+  
+  <!-- Background Decoration -->
+  <div style="position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;">
+    <div style="position: absolute; top: -20%; left: -10%; width: 40%; height: 40%; background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);"></div>
+    <div style="position: absolute; bottom: -20%; right: -10%; width: 50%; height: 50%; background: radial-gradient(circle, rgba(96, 165, 250, 0.06) 0%, transparent 70%);"></div>
+  </div>
+
+  <!-- Confetti Container -->
+  <div id="confetti-container" class="confetti-container"></div>
+
+  <!-- Sound Toggle -->
+  <button id="sound-toggle" class="sound-toggle muted" title="Ativar/Desativar sons">
+    <span id="sound-icon">🔇</span>
+  </button>
+
+  <div class="container container-md" style="position: relative; z-index: 1;">
+    
+    <!-- Header with Score -->
+    <header class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-3">
+        <span style="color: var(--accent-light);"><%- include('icons/cpu-chip', { size: 28 }) %></span>
+        <div>
+          <h1 class="text-title" style="margin: 0; font-size: 1.125rem;">IA ou Não?</h1>
+          <p id="player-info" class="text-small"></p>
+        </div>
+      </div>
+      
+      <!-- Score Chip (hidden in lobby) -->
+      <div id="score-chip" class="score-chip hidden">
+        <div>
+          <span id="my-score" class="score-chip-value">0</span>
+          <span class="score-chip-label">pts</span>
+        </div>
+        <div style="width: 1px; height: 24px; background: var(--border-color);"></div>
+        <div>
+          <span id="my-position" class="score-chip-value">#-</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==================== LOBBY STATE ==================== -->
+    <div id="lobby-section" class="animate-fadeInUp">
+      <div class="card text-center" style="padding: 3rem 2rem;">
+        <div class="animate-float" style="margin-bottom: 1.5rem; color: var(--accent-light);">
+          <%- include('icons/clock', { size: 64 }) %>
+        </div>
+        <h2 class="text-headline mb-2">Sala <%= roomCode %></h2>
+        <p class="text-secondary mb-6">Aguardando o facilitador iniciar o jogo...</p>
+        
+        <div class="animate-pulse">
+          <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: rgba(37, 99, 235, 0.1); border-radius: var(--radius-full); border: 1px solid rgba(59, 130, 246, 0.2);">
+            <span style="color: var(--accent-light);"><%- include('icons/device-phone-mobile', { size: 20 }) %></span>
+            <span class="text-caption" style="color: var(--accent-light);">Fique atento ao seu dispositivo!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== QUESTION STATE ==================== -->
+    <div id="question-section" class="hidden">
+      
+      <!-- Question Card -->
+      <div class="card mb-4 animate-fadeInUp" style="padding: 1.25rem;">
+        
+        <!-- Question Header -->
+        <div class="flex justify-between items-center mb-4">
+          <span id="question-type" class="badge badge-primary"></span>
+          <span id="question-counter" class="badge badge-neutral"></span>
+        </div>
+        
+        <!-- Timer Progress -->
+        <div id="timer-container" class="mb-4 hidden">
+          <div class="progress-bar" style="height: 6px;">
+            <div id="timer-progress" class="progress-fill" style="width: 100%;"></div>
+          </div>
+        </div>
+        
+        <!-- Question Image -->
+        <div id="question-image" class="mb-4 hidden">
+          <img id="question-img" src="" alt="Imagem da pergunta" 
+               style="width: 100%; max-height: 280px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary);">
+        </div>
+        
+        <!-- Question Text -->
+        <p id="question-prompt" class="text-body" style="white-space: pre-line; line-height: 1.7;"></p>
+      </div>
+
+      <!-- Options -->
+      <div id="options-container" class="space-y-3 animate-stagger"></div>
+
+      <!-- Answer Sent Feedback -->
+      <div id="waiting-feedback" class="card text-center mt-4 hidden animate-scaleIn" style="padding: 1.5rem;">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; background: var(--success-bg); border-radius: var(--radius-full); margin-bottom: 0.75rem; color: var(--success-light);">
+          <%- include('icons/check', { size: 24 }) %>
+        </div>
+        <p class="text-title" style="color: var(--success-light);">Resposta enviada!</p>
+        <p class="text-caption">Aguardando o facilitador revelar o resultado...</p>
+      </div>
+    </div>
+
+    <!-- ==================== RESULT STATE ==================== -->
+    <div id="result-section" class="hidden">
+      <div class="card animate-scaleIn" style="padding: 1.5rem;">
+        
+        <!-- Result Icon & Title -->
+        <div class="text-center mb-6">
+          <div id="result-icon" style="font-size: 4rem; margin-bottom: 0.5rem;"></div>
+          <h2 id="result-title" class="text-headline"></h2>
+        </div>
+        
+        <!-- Points Animation -->
+        <div id="points-animation" class="text-center hidden" style="margin-bottom: 1.5rem;">
+          <span id="points-value" class="animate-pointsUp" style="display: inline-block; font-size: 2rem; font-weight: 800; color: var(--success-light);"></span>
+        </div>
+
+        <!-- Correct Answer -->
+        <div class="callout callout-success mb-4">
+          <span class="callout-icon"><%- include('icons/check-circle', { size: 20 }) %></span>
+          <div class="callout-content">
+            <p class="callout-title" style="color: var(--success-light);">Resposta correta</p>
+            <p id="correct-answer" style="font-weight: 600;"></p>
+          </div>
+        </div>
+        
+        <!-- Stats Bars -->
+        <div id="result-stats" class="space-y-2 mb-4"></div>
+        
+        <!-- Explanation -->
+        <div class="callout callout-info">
+          <span class="callout-icon"><%- include('icons/light-bulb', { size: 20 }) %></span>
+          <div class="callout-content">
+            <p class="callout-title">Explicação</p>
+            <p id="explanation" class="text-caption" style="color: var(--text-secondary);"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== GAME OVER STATE ==================== -->
+    <div id="gameover-section" class="hidden">
+      <div class="card animate-scaleIn" style="padding: 2rem;">
+        
+        <!-- Trophy -->
+        <div class="text-center mb-6">
+          <div class="animate-float" style="display: inline-block; color: var(--warning);">
+            <%- include('icons/trophy', { size: 80 }) %>
+          </div>
+          <h2 class="text-headline mt-4">Fim do Jogo!</h2>
+        </div>
+        
+        <!-- Final Ranking -->
+        <div class="mb-6">
+          <h3 class="text-caption mb-3" style="text-transform: uppercase; letter-spacing: 0.1em;">Ranking Final</h3>
+          <div id="final-ranking" class="space-y-2"></div>
+        </div>
+        
+        <!-- My Final Score -->
+        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(96, 165, 250, 0.1) 100%); border-radius: var(--radius-lg); border: 1px solid rgba(59, 130, 246, 0.2); text-align: center;">
+          <p class="text-caption mb-1">Sua pontuação final</p>
+          <p id="final-score" style="font-size: 2.5rem; font-weight: 800; color: var(--accent-light);">0 pts</p>
+        </div>
+        
+        <!-- Play Again -->
+        <div class="mt-6 text-center">
+          <a href="/join" class="btn btn-primary">
+            Jogar Novamente
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const roomCode = '<%= roomCode %>';
+    const playerId = sessionStorage.getItem('playerId');
+    const nickname = sessionStorage.getItem('nickname');
+    
+    // Redirect if no player session
+    if (!playerId) {
+      window.location.href = `/join?code=${roomCode}`;
+    }
+    
+    document.getElementById('player-info').textContent = `${nickname} • ${roomCode}`;
+
+    // Sound settings
+    let soundEnabled = false;
+    const soundToggle = document.getElementById('sound-toggle');
+    const soundIcon = document.getElementById('sound-icon');
+    
+    soundToggle.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundToggle.classList.toggle('muted', !soundEnabled);
+      soundIcon.textContent = soundEnabled ? '🔊' : '🔇';
+    });
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      // Simple beep sounds using Web Audio API
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+        
+        if (type === 'correct') {
+          oscillator.frequency.value = 800;
+          gain.gain.value = 0.3;
+        } else {
+          oscillator.frequency.value = 300;
+          gain.gain.value = 0.2;
+        }
+        
+        oscillator.start();
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        oscillator.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    // State
+    let socket = null;
+    let currentQuestion = null;
+    let questionStartTime = null;
+    let hasAnswered = false;
+    let mySelectedOption = null;
+
+    // DOM Elements
+    const lobbySection = document.getElementById('lobby-section');
+    const questionSection = document.getElementById('question-section');
+    const resultSection = document.getElementById('result-section');
+    const gameoverSection = document.getElementById('gameover-section');
+    const waitingFeedback = document.getElementById('waiting-feedback');
+    const optionsContainer = document.getElementById('options-container');
+    const scoreChip = document.getElementById('score-chip');
+
+    // Connect to Socket.io
+    socket = io();
+    socket.emit('join:room', { roomCode, playerId });
+
+    socket.on('room:state', updateState);
+    socket.on('game:ended', showGameOver);
+    socket.on('error', (data) => {
+      alert('Erro: ' + data.message);
+    });
+
+    function updateState(state) {
+      console.log('State:', state);
+      
+      // Update my score and position
+      const me = state.players.find(p => p.id === playerId);
+      if (me) {
+        document.getElementById('my-score').textContent = me.score;
+        const position = state.players.findIndex(p => p.id === playerId) + 1;
+        document.getElementById('my-position').textContent = `#${position}`;
+      }
+
+      // Hide all sections first
+      lobbySection.classList.add('hidden');
+      questionSection.classList.add('hidden');
+      resultSection.classList.add('hidden');
+      gameoverSection.classList.add('hidden');
+
+      if (state.status === 'lobby') {
+        lobbySection.classList.remove('hidden');
+        scoreChip.classList.add('hidden');
+      } 
+      else if (state.status === 'asking') {
+        scoreChip.classList.remove('hidden');
+        
+        if (state.currentQuestion) {
+          // New question
+          if (!currentQuestion || currentQuestion.id !== state.currentQuestion.id) {
+            currentQuestion = state.currentQuestion;
+            questionStartTime = Date.now();
+            hasAnswered = false;
+            mySelectedOption = null;
+            showQuestion(state.currentQuestion);
+          }
+          
+          questionSection.classList.remove('hidden');
+          
+          // Check if already answered
+          if (me && me.hasAnswered) {
+            hasAnswered = true;
+            disableOptions();
+            waitingFeedback.classList.remove('hidden');
+          }
+        }
+      } 
+      else if (state.status === 'revealed' && state.revealedQuestion) {
+        scoreChip.classList.remove('hidden');
+        showResult(state.revealedQuestion, state.players);
+      }
+    }
+
+    function showQuestion(q) {
+      const typeLabels = {
+        'IMAGE_CLASSIFY': '🖼️ Imagem',
+        'TEXT_CLASSIFY': '📝 Texto',
+        'HALLUCINATION_DETECT': '🔍 Alucinação',
+        'LGPD_TRAFFIC_LIGHT': '🚦 LGPD'
+      };
+      
+      document.getElementById('question-type').textContent = typeLabels[q.type] || q.type;
+      document.getElementById('question-counter').textContent = `${q.index + 1} de ${q.total}`;
+      document.getElementById('question-prompt').textContent = q.prompt;
+      
+      // Image
+      const imgSection = document.getElementById('question-image');
+      if (q.imageUrl) {
+        imgSection.classList.remove('hidden');
+        document.getElementById('question-img').src = q.imageUrl;
+      } else {
+        imgSection.classList.add('hidden');
+      }
+      
+      // Options with staggered animation
+      optionsContainer.innerHTML = q.options.map((opt, i) => `
+        <button 
+          class="btn-option animate-slideInLeft" 
+          style="animation-delay: ${i * 50}ms;"
+          data-option="${i}"
+          onclick="selectOption(${i})"
+        >
+          <span class="option-letter">${String.fromCharCode(65 + i)}</span>
+          <span style="flex: 1;">${opt}</span>
+        </button>
+      `).join('');
+      
+      waitingFeedback.classList.add('hidden');
+    }
+
+    function selectOption(optionIndex) {
+      if (hasAnswered) return;
+      
+      hasAnswered = true;
+      mySelectedOption = optionIndex;
+      const timeMs = Date.now() - questionStartTime;
+      
+      // Mark selected option
+      document.querySelectorAll('.btn-option').forEach((btn, i) => {
+        btn.classList.remove('selected');
+        if (i === optionIndex) {
+          btn.classList.add('selected');
+        }
+      });
+      
+      // Disable all options
+      disableOptions();
+      
+      // Show feedback
+      waitingFeedback.classList.remove('hidden');
+      
+      // Emit answer
+      socket.emit('player:answer', {
+        roomCode,
+        playerId,
+        questionId: currentQuestion.id,
+        selectedOption: optionIndex,
+        timeMs
+      });
+    }
+
+    function disableOptions() {
+      document.querySelectorAll('.btn-option').forEach(btn => {
+        btn.disabled = true;
+      });
+    }
+
+    function showResult(q, players) {
+      questionSection.classList.add('hidden');
+      resultSection.classList.remove('hidden');
+      
+      const wasCorrect = mySelectedOption === q.correctOption;
+      
+      // Icon and title
+      document.getElementById('result-icon').textContent = wasCorrect ? '🎉' : '😔';
+      const resultTitle = document.getElementById('result-title');
+      resultTitle.textContent = wasCorrect ? 'Você acertou!' : 'Não foi dessa vez...';
+      resultTitle.style.color = wasCorrect ? 'var(--success-light)' : 'var(--error-light)';
+      
+      // Points animation
+      if (wasCorrect) {
+        const pointsEl = document.getElementById('points-animation');
+        const pointsValue = document.getElementById('points-value');
+        pointsEl.classList.remove('hidden');
+        pointsValue.textContent = '+100';
+        
+        // Trigger confetti
+        createConfetti();
+        playSound('correct');
+      } else {
+        document.getElementById('points-animation').classList.add('hidden');
+        playSound('wrong');
+        // Shake animation for wrong answer
+        resultSection.querySelector('.card').classList.add('animate-shake');
+        setTimeout(() => {
+          resultSection.querySelector('.card').classList.remove('animate-shake');
+        }, 400);
+      }
+      
+      // Correct answer
+      document.getElementById('correct-answer').textContent = 
+        `${String.fromCharCode(65 + q.correctOption)}) ${q.options[q.correctOption]}`;
+      
+      // Stats bars
+      if (q.stats) {
+        const statsHtml = q.stats.map((s, i) => {
+          const isCorrect = i === q.correctOption;
+          const isSelected = i === mySelectedOption;
+          return `
+            <div class="stat-bar-container ${isSelected ? 'ring-2 ring-blue-500' : ''}">
+              <span class="stat-bar-label" style="${isCorrect ? 'background: var(--success);' : ''}">${String.fromCharCode(65 + i)}</span>
+              <div class="stat-bar-track">
+                <div class="stat-bar-fill ${isCorrect ? 'correct' : ''}" style="width: ${s.percentage}%;"></div>
+              </div>
+              <span class="stat-bar-percentage">${s.percentage}%</span>
+            </div>
+          `;
+        }).join('');
+        document.getElementById('result-stats').innerHTML = statsHtml;
+      }
+      
+      // Explanation
+      document.getElementById('explanation').textContent = q.explanation;
+    }
+
+    function showGameOver(data) {
+      lobbySection.classList.add('hidden');
+      questionSection.classList.add('hidden');
+      resultSection.classList.add('hidden');
+      scoreChip.classList.add('hidden');
+      gameoverSection.classList.remove('hidden');
+      
+      const medals = ['🥇', '🥈', '🥉'];
+      const rankingHtml = data.ranking.slice(0, 10).map((p, i) => {
+        const isMe = p.id === playerId;
+        let rankClass = '';
+        if (i === 0) rankClass = 'gold';
+        else if (i === 1) rankClass = 'silver';
+        else if (i === 2) rankClass = 'bronze';
+        else if (isMe) rankClass = 'highlight';
+        
+        return `
+          <div class="ranking-item ${rankClass}">
+            <span class="ranking-position">${medals[i] || `${i + 1}º`}</span>
+            <span class="ranking-name">${p.nickname}${isMe ? ' (você)' : ''}</span>
+            <span class="ranking-score">${p.score} pts</span>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('final-ranking').innerHTML = rankingHtml;
+      
+      const me = data.ranking.find(p => p.id === playerId);
+      document.getElementById('final-score').textContent = me ? `${me.score} pts` : '0 pts';
+      
+      // Big confetti for game over
+      createConfetti(30);
+    }
+
+    // Confetti effect
+    function createConfetti(count = 15) {
+      const container = document.getElementById('confetti-container');
+      const colors = ['#3B82F6', '#60A5FA', '#22C55E', '#FBBF24', '#F87171'];
+      
+      for (let i = 0; i < count; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti-piece';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.top = '-10px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        
+        container.appendChild(confetti);
+        
+        // Animate
+        confetti.animate([
+          { 
+            opacity: 1, 
+            transform: `translateY(0) rotate(0deg)`,
+          },
+          { 
+            opacity: 0, 
+            transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 720}deg)`,
+          }
+        ], {
+          duration: 2000 + Math.random() * 2000,
+          easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          delay: i * 50
+        }).onfinish = () => confetti.remove();
+      }
+    }
+  </script>
+</body>
+</html>

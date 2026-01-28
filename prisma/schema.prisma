@@ -1,0 +1,163 @@
+// Prisma Schema para IA ou Não?
+// Ferramenta gamificada para oficina "IA na Educação"
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Status possíveis de uma sala
+enum RoomStatus {
+  lobby     // Aguardando jogadores
+  asking    // Pergunta liberada, aguardando respostas
+  revealed  // Resultado revelado
+  ended     // Sala encerrada
+}
+
+// Tipos de questões
+enum QuestionType {
+  IMAGE_CLASSIFY        // Imagem feita por IA ou humano?
+  TEXT_CLASSIFY         // Texto de IA ou humano?
+  HALLUCINATION_DETECT  // Tem erro/alucinação?
+  LGPD_TRAFFIC_LIGHT    // Pode/Depende/Não pode
+}
+
+// Salas de jogo
+model Room {
+  id              String      @id @default(cuid())
+  code            String      @unique @db.VarChar(6)
+  status          RoomStatus  @default(lobby)
+  currentQuestionIndex Int    @default(-1) @map("current_question_index")
+  questionStartedAt DateTime? @map("question_started_at")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  expiresAt       DateTime    @map("expires_at")
+
+  players         Player[]
+  roomQuestions   RoomQuestion[]
+  answers         Answer[]
+
+  @@map("rooms")
+}
+
+// Jogadores (apenas nickname, sem dados pessoais)
+model Player {
+  id        String   @id @default(cuid())
+  roomId    String   @map("room_id")
+  nickname  String   @db.VarChar(30)
+  score     Int      @default(0)
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  answers   Answer[]
+
+  @@map("players")
+}
+
+// Banco de questões (perguntas cadastradas)
+model Question {
+  id            String       @id @default(cuid())
+  type          QuestionType
+  prompt        String       @db.Text
+  imageUrl      String?      @map("image_url") @db.VarChar(500)
+  optionsJson   Json         @map("options_json") // Array de alternativas
+  correctOption Int          @map("correct_option") // Índice da resposta correta (0-based)
+  explanation   String       @db.Text
+  orderIndex    Int          @default(0) @map("order_index")
+  isActive      Boolean      @default(true) @map("is_active")
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  roomQuestions RoomQuestion[]
+  answers       Answer[]
+
+  @@map("questions")
+}
+
+// Associação de questões por sala (para randomizar ordem)
+model RoomQuestion {
+  id          String   @id @default(cuid())
+  roomId      String   @map("room_id")
+  questionId  String   @map("question_id")
+  orderIndex  Int      @map("order_index")
+
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, questionId])
+  @@map("room_questions")
+}
+
+// Respostas dos jogadores
+model Answer {
+  id             String   @id @default(cuid())
+  roomId         String   @map("room_id")
+  playerId       String   @map("player_id")
+  questionId     String   @map("question_id")
+  selectedOption Int      @map("selected_option")
+  isCorrect      Boolean  @map("is_correct")
+  timeMs         Int      @map("time_ms") // Tempo em milissegundos
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  room           Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  player         Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  question       Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, playerId, questionId])
+  @@map("answers")
+}
+
+// ==================== CATÁLOGO DE IAs ====================
+
+// Tipos de precificação de ferramentas IA
+enum PricingType {
+  FREE      // Totalmente gratuito
+  FREEMIUM  // Gratuito com limites / plano pago opcional
+  PAID      // Apenas pago
+}
+
+// Categorias de ferramentas IA
+model AiCategory {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  icon        String   @db.VarChar(10) // Emoji
+  description String?  @db.Text
+  orderIndex  Int      @default(0) @map("order_index")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tools       AiTool[]
+
+  @@map("ai_categories")
+}
+
+// Ferramentas de IA
+model AiTool {
+  id             String      @id @default(cuid())
+  name           String      @db.VarChar(100)
+  slug           String      @unique @db.VarChar(100)
+  description    String      @db.Text
+  shortDesc      String      @map("short_desc") @db.VarChar(200) // Descrição curta para cards
+  url            String      @db.VarChar(500)
+  logoUrl        String?     @map("logo_url") @db.VarChar(500)
+  categoryId     String      @map("category_id")
+  pricingType    PricingType @default(FREEMIUM) @map("pricing_type")
+  pricingDetails String?     @map("pricing_details") @db.VarChar(200) // Ex: "Grátis até 100 msgs/dia"
+  features       String[]    // Array de features principais
+  pros           String[]    // Pontos positivos
+  cons           String[]    // Pontos negativos
+  useCases       String[]    @map("use_cases") // Casos de uso na educação
+  orderIndex     Int         @default(0) @map("order_index")
+  isActive       Boolean     @default(true) @map("is_active")
+  isFeatured     Boolean     @default(false) @map("is_featured") // Destaque
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  category       AiCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("ai_tools")
+}

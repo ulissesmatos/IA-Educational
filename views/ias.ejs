@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="gradient-bg min-h-screen">
+  
+  <!-- Background Decoration -->
+  <div style="position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;">
+    <div style="position: absolute; top: -20%; left: -10%; width: 40%; height: 40%; background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);"></div>
+    <div style="position: absolute; bottom: -20%; right: -10%; width: 50%; height: 50%; background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%);"></div>
+  </div>
+
+  <div class="container container-lg py-6" style="position: relative; z-index: 1;">
+    
+    <!-- Header -->
+    <header class="mb-6 animate-fadeInDown">
+      <div class="flex items-center gap-3 mb-4">
+        <a href="/" class="btn btn-secondary" style="padding: 0.5rem 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+          <%- include('icons/arrow-left', { size: 16 }) %> Voltar
+        </a>
+      </div>
+      <div class="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 class="text-display gradient-text mb-2" style="display: flex; align-items: center; gap: 12px;">
+            <%- include('icons/book-open', { size: 40 }) %>
+            Catálogo de IAs
+          </h1>
+          <p class="text-caption" style="max-width: 500px;">
+            Ferramentas de Inteligência Artificial para potencializar o ensino e aprendizagem
+          </p>
+        </div>
+        <div class="text-right">
+          <div class="text-headline" style="color: var(--accent-primary);"><%= tools.length %></div>
+          <div class="text-small" style="color: var(--text-muted);">ferramentas encontradas</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filters -->
+    <section class="card mb-6 animate-fadeInUp" style="padding: 1.25rem;">
+      <form id="filterForm" class="flex gap-4 flex-wrap items-end">
+        
+        <!-- Search -->
+        <div style="flex: 1; min-width: 200px;">
+          <label class="text-small" style="display: flex; align-items: center; gap: 4px; margin-bottom: 0.5rem; color: var(--text-muted);">
+            <%- include('icons/magnifying-glass', { size: 14 }) %> Buscar
+          </label>
+          <input 
+            type="text" 
+            name="busca" 
+            value="<%= filters.query || '' %>"
+            placeholder="Nome ou descrição..."
+            class="input"
+            style="width: 100%;"
+          >
+        </div>
+
+        <!-- Category Filter -->
+        <div style="min-width: 180px;">
+          <label class="text-small" style="display: flex; align-items: center; gap: 4px; margin-bottom: 0.5rem; color: var(--text-muted);">
+            <%- include('icons/folder', { size: 14 }) %> Categoria
+          </label>
+          <select name="categoria" class="input" style="width: 100%;">
+            <option value="">Todas</option>
+            <% categories.forEach(function(cat) { %>
+              <option value="<%= cat.slug %>" <%= filters.categorySlug === cat.slug ? 'selected' : '' %>>
+                <%= cat.name %> (<%= cat.toolCount %>)
+              </option>
+            <% }); %>
+          </select>
+        </div>
+
+        <!-- Pricing Filter -->
+        <div style="min-width: 150px;">
+          <label class="text-small" style="display: flex; align-items: center; gap: 4px; margin-bottom: 0.5rem; color: var(--text-muted);">
+            <%- include('icons/currency-dollar', { size: 14 }) %> Preço
+          </label>
+          <select name="preco" class="input" style="width: 100%;">
+            <option value="">Todos</option>
+            <option value="FREE" <%= filters.pricingType === 'FREE' ? 'selected' : '' %>>Grátis</option>
+            <option value="FREEMIUM" <%= filters.pricingType === 'FREEMIUM' ? 'selected' : '' %>>Freemium</option>
+            <option value="PAID" <%= filters.pricingType === 'PAID' ? 'selected' : '' %>>Pago</option>
+          </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">
+          Filtrar
+        </button>
+
+        <% if (filters.categorySlug || filters.pricingType || filters.query) { %>
+          <a href="/ias" class="btn btn-secondary">
+            Limpar
+          </a>
+        <% } %>
+      </form>
+    </section>
+
+    <!-- Active Filters Display -->
+    <% if (currentCategory || filters.pricingType || filters.query) { %>
+    <div class="flex gap-2 flex-wrap mb-4 animate-fadeIn">
+      <% if (currentCategory) { %>
+        <span class="badge badge-primary" style="padding: 0.5rem 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+          <%- include('icons/folder', { size: 12 }) %> <%= currentCategory.name %>
+          <a href="/ias<%= filters.pricingType ? '?preco=' + filters.pricingType : '' %><%= filters.query ? (filters.pricingType ? '&' : '?') + 'busca=' + filters.query : '' %>" 
+             style="margin-left: 0.5rem; opacity: 0.7;">
+            <%- include('icons/x-mark', { size: 12 }) %>
+          </a>
+        </span>
+      <% } %>
+      <% if (filters.pricingType) { %>
+        <span class="badge <%= filters.pricingType === 'FREE' ? 'badge-success' : filters.pricingType === 'FREEMIUM' ? 'badge-warning' : 'badge-error' %>" style="padding: 0.5rem 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+          <% if (filters.pricingType === 'FREE') { %>
+            <%- include('icons/check-circle', { size: 12 }) %> Grátis
+          <% } else if (filters.pricingType === 'FREEMIUM') { %>
+            <%- include('icons/minus-circle', { size: 12 }) %> Freemium
+          <% } else { %>
+            <%- include('icons/currency-dollar', { size: 12 }) %> Pago
+          <% } %>
+          <a href="/ias<%= currentCategory ? '?categoria=' + currentCategory.slug : '' %><%= filters.query ? (currentCategory ? '&' : '?') + 'busca=' + filters.query : '' %>" 
+             style="margin-left: 0.5rem; opacity: 0.7;">
+            <%- include('icons/x-mark', { size: 12 }) %>
+          </a>
+        </span>
+      <% } %>
+      <% if (filters.query) { %>
+        <span class="badge badge-neutral" style="padding: 0.5rem 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+          <%- include('icons/magnifying-glass', { size: 12 }) %> "<%= filters.query %>"
+          <a href="/ias<%= currentCategory ? '?categoria=' + currentCategory.slug : '' %><%= filters.pricingType ? (currentCategory ? '&' : '?') + 'preco=' + filters.pricingType : '' %>" 
+             style="margin-left: 0.5rem; opacity: 0.7;">
+            <%- include('icons/x-mark', { size: 12 }) %>
+          </a>
+        </span>
+      <% } %>
+    </div>
+    <% } %>
+
+    <!-- Category Quick Filter Pills (only when no category is selected) -->
+    <% if (!currentCategory) { %>
+    <div class="flex gap-2 flex-wrap mb-6 animate-fadeInUp" style="animation-delay: 100ms;">
+      <% categories.forEach(function(cat) { %>
+        <a href="/ias?categoria=<%= cat.slug %><%= filters.pricingType ? '&preco=' + filters.pricingType : '' %><%= filters.query ? '&busca=' + filters.query : '' %>" 
+           class="badge badge-neutral" 
+           style="padding: 0.5rem 0.75rem; text-decoration: none; transition: all 0.2s;">
+          <%= cat.name %>
+        </a>
+      <% }); %>
+    </div>
+    <% } %>
+
+    <!-- Tools Grid -->
+    <% if (tools.length > 0) { %>
+    <div class="grid gap-4 animate-fadeInUp" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); animation-delay: 150ms;">
+      <% tools.forEach(function(tool, index) { %>
+        <a href="/ias/<%= tool.slug %>" class="card card-hover" style="text-decoration: none; padding: 1.5rem;">
+          <div class="flex items-start gap-3 mb-3">
+            <% if (tool.logoUrl) { %>
+              <img src="<%= tool.logoUrl %>" alt="<%= tool.name %>" 
+                   style="width: 48px; height: 48px; border-radius: 10px; object-fit: contain; background: var(--bg-tertiary); padding: 4px; flex-shrink: 0;"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div style="display: none; width: 48px; height: 48px; border-radius: 10px; background: var(--bg-tertiary); align-items: center; justify-content: center; flex-shrink: 0; color: var(--text-muted);">
+                <%- include('icons/cpu-chip', { size: 24 }) %>
+              </div>
+            <% } else { %>
+              <div style="width: 48px; height: 48px; border-radius: 10px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--text-muted);">
+                <%- include('icons/cpu-chip', { size: 24 }) %>
+              </div>
+            <% } %>
+            <div style="flex: 1; min-width: 0;">
+              <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <h3 class="text-title" style="margin: 0;"><%= tool.name %></h3>
+                <% if (tool.isFeatured) { %>
+                  <span style="color: var(--warning);"><%- include('icons/star', { size: 16 }) %></span>
+                <% } %>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <% if (tool.pricingType === 'FREE') { %>
+                  <span class="badge badge-success" style="font-size: 0.7rem; display: inline-flex; align-items: center; gap: 3px;">
+                    <%- include('icons/check-circle', { size: 12 }) %> Grátis
+                  </span>
+                <% } else if (tool.pricingType === 'FREEMIUM') { %>
+                  <span class="badge badge-warning" style="font-size: 0.7rem; display: inline-flex; align-items: center; gap: 3px;">
+                    <%- include('icons/minus-circle', { size: 12 }) %> Freemium
+                  </span>
+                <% } else { %>
+                  <span class="badge badge-error" style="font-size: 0.7rem; display: inline-flex; align-items: center; gap: 3px;">
+                    <%- include('icons/currency-dollar', { size: 12 }) %> Pago
+                  </span>
+                <% } %>
+                <% if (tool.category) { %>
+                  <span class="badge badge-neutral" style="font-size: 0.7rem;">
+                    <%= tool.category.name %>
+                  </span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          
+          <p class="text-body mb-3" style="color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            <%= tool.shortDesc %>
+          </p>
+
+          <% if (tool.useCases && tool.useCases.length > 0) { %>
+            <div class="flex gap-1 flex-wrap">
+              <% tool.useCases.slice(0, 2).forEach(function(useCase) { %>
+                <span class="text-small" style="color: var(--text-muted); background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 3px;">
+                  <%- include('icons/academic-cap', { size: 10 }) %> <%= useCase %>
+                </span>
+              <% }); %>
+              <% if (tool.useCases.length > 2) { %>
+                <span class="text-small" style="color: var(--text-muted); background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">
+                  +<%= tool.useCases.length - 2 %>
+                </span>
+              <% } %>
+            </div>
+          <% } %>
+
+          <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+            <span class="text-small" style="color: var(--accent-primary); display: inline-flex; align-items: center; gap: 4px;">
+              Ver detalhes <%- include('icons/arrow-right', { size: 14 }) %>
+            </span>
+          </div>
+        </a>
+      <% }); %>
+    </div>
+    <% } else { %>
+      <!-- Empty State -->
+      <div class="card text-center" style="padding: 4rem 2rem;">
+        <div style="margin-bottom: 1rem; color: var(--text-muted);">
+          <%- include('icons/magnifying-glass', { size: 64 }) %>
+        </div>
+        <h2 class="text-headline mb-2">Nenhuma ferramenta encontrada</h2>
+        <p class="text-caption mb-4" style="color: var(--text-muted);">
+          Tente ajustar os filtros ou buscar por outros termos
+        </p>
+        <a href="/ias" class="btn btn-primary">
+          Limpar filtros
+        </a>
+      </div>
+    <% } %>
+
+    <!-- Stats by Pricing -->
+    <section class="mt-8 animate-fadeInUp" style="animation-delay: 300ms;">
+      <div class="card" style="padding: 1.25rem;">
+        <h3 class="text-body mb-3" style="color: var(--text-muted);">Ferramentas por tipo de preço:</h3>
+        <div class="flex gap-4 flex-wrap">
+          <a href="/ias?preco=FREE" class="flex items-center gap-2" style="text-decoration: none;">
+            <span class="badge badge-success" style="display: inline-flex; align-items: center; gap: 3px;">
+              <%- include('icons/check-circle', { size: 12 }) %> Grátis
+            </span>
+            <span class="text-body"><%= stats.FREE %></span>
+          </a>
+          <a href="/ias?preco=FREEMIUM" class="flex items-center gap-2" style="text-decoration: none;">
+            <span class="badge badge-warning" style="display: inline-flex; align-items: center; gap: 3px;">
+              <%- include('icons/minus-circle', { size: 12 }) %> Freemium
+            </span>
+            <span class="text-body"><%= stats.FREEMIUM %></span>
+          </a>
+          <a href="/ias?preco=PAID" class="flex items-center gap-2" style="text-decoration: none;">
+            <span class="badge badge-error" style="display: inline-flex; align-items: center; gap: 3px;">
+              <%- include('icons/currency-dollar', { size: 12 }) %> Pago
+            </span>
+            <span class="text-body"><%= stats.PAID %></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center">
+      <a href="/" class="text-caption" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+        <%- include('icons/arrow-left', { size: 14 }) %> Voltar ao início
+      </a>
+    </footer>
+  </div>
+
+  <style>
+    .grid {
+      display: grid;
+    }
+    .input {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.625rem 0.875rem;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .input::placeholder {
+      color: var(--text-muted);
+    }
+    select.input {
+      cursor: pointer;
+    }
+  </style>
+</body>
+</html>
