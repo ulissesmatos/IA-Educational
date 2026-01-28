@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body class="admin-body" style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);">
+  
+  <div class="admin-card" style="width: 100%; max-width: 420px; box-shadow: var(--admin-shadow-lg);">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: var(--admin-accent); border-radius: var(--admin-radius-lg); margin-bottom: 1rem;">
+        <svg style="width: 28px; height: 28px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        </svg>
+      </div>
+      <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--admin-text-primary);">Painel Admin</h1>
+      <p style="font-size: 0.875rem; color: var(--admin-text-secondary);">Entre com suas credenciais</p>
+    </div>
+
+    <% if (error) { %>
+      <div class="admin-alert admin-alert-error">
+        <svg style="width: 20px; height: 20px; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span style="font-size: 0.875rem;"><%= error %></span>
+      </div>
+    <% } %>
+
+    <form method="POST" action="/admin/login">
+      <input type="hidden" name="redirect" value="<%= redirect %>">
+      
+      <div class="admin-form-group">
+        <label class="admin-label" for="email">Email</label>
+        <input
+          class="admin-input"
+          type="email"
+          id="email"
+          name="email"
+          placeholder="seu@email.com"
+          required
+          autofocus
+        >
+      </div>
+
+      <div class="admin-form-group">
+        <label class="admin-label" for="password">Senha</label>
+        <input
+          class="admin-input"
+          type="password"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          required
+        >
+      </div>
+
+      <button type="submit" class="admin-btn admin-btn-primary" style="width: 100%; padding: 12px; margin-top: 0.5rem;">
+        Entrar
+      </button>
+    </form>
+
+    <div style="margin-top: 2rem; text-align: center;">
+      <a href="/" style="font-size: 0.8125rem; color: var(--admin-text-secondary); text-decoration: none;">
+        ← Voltar ao site
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

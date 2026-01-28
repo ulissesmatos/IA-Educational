@@ -1,0 +1,140 @@
+<%- include('../partials/header') %>
+
+<div class="admin-header">
+    <div>
+        <h1 class="admin-page-title">Ferramentas de IA</h1>
+        <p class="admin-page-description">Gerencie o catálogo de ferramentas de inteligência artificial</p>
+    </div>
+    <a href="/admin/ai-tools/new" class="admin-btn admin-btn-primary">
+        <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nova Ferramenta
+    </a>
+</div>
+
+<div class="admin-content">
+    <% if (tools && tools.length > 0) { %>
+        <div class="admin-card">
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Nome</th>
+                            <th style="width: 30%;">Descrição</th>
+                            <th style="width: 15%;">Categoria</th>
+                            <th style="width: 10%;">Preço</th>
+                            <th style="width: 10%;">Status</th>
+                            <th style="width: 10%;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% tools.forEach(tool => { %>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <% if (tool.icon) { %>
+                                            <div style="width: 2rem; height: 2rem; border-radius: 0.5rem; background: var(--admin-accent-light); color: var(--admin-accent); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                                <%= tool.icon %>
+                                            </div>
+                                        <% } %>
+                                        <div>
+                                            <strong><%= tool.name %></strong>
+                                            <% if (tool.isFeatured) { %>
+                                                <span class="admin-badge admin-badge-warning" style="margin-left: 0.5rem; font-size: 0.7rem;">
+                                                    Destaque
+                                                </span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="max-width: 300px; white-space: normal; font-size: 0.875rem; color: var(--admin-text-secondary);">
+                                        <%= tool.description.substring(0, 100) %><%= tool.description.length > 100 ? '...' : '' %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="admin-badge admin-badge-secondary">
+                                        <%= tool.category ? tool.category.name : 'Sem categoria' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <% if (tool.pricing === 'free') { %>
+                                        <span class="admin-badge admin-badge-success">Grátis</span>
+                                    <% } else if (tool.pricing === 'freemium') { %>
+                                        <span class="admin-badge admin-badge-info">Freemium</span>
+                                    <% } else { %>
+                                        <span class="admin-badge admin-badge-secondary">Pago</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <form action="/admin/ai-tools/<%= tool.id %>/toggle" method="POST" style="display: inline;">
+                                        <% if (tool.isActive) { %>
+                                            <button type="submit" class="admin-badge admin-badge-success" style="border: none; cursor: pointer;">
+                                                Ativo
+                                            </button>
+                                        <% } else { %>
+                                            <button type="submit" class="admin-badge admin-badge-secondary" style="border: none; cursor: pointer;">
+                                                Inativo
+                                            </button>
+                                        <% } %>
+                                    </form>
+                                </td>
+                                <td>
+                                    <div class="admin-action-buttons">
+                                        <form action="/admin/ai-tools/<%= tool.id %>/toggle-featured" method="POST" style="display: inline;">
+                                            <button 
+                                                type="submit" 
+                                                class="admin-btn-icon" 
+                                                title="<%= tool.isFeatured ? 'Remover destaque' : 'Destacar' %>"
+                                                style="<%= tool.isFeatured ? 'color: var(--admin-warning);' : '' %>"
+                                            >
+                                                <svg fill="<%= tool.isFeatured ? 'currentColor' : 'none' %>" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                        <a href="/admin/ai-tools/<%= tool.id %>/edit" class="admin-btn-icon" title="Editar">
+                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </a>
+                                        <button 
+                                            class="admin-btn-icon admin-btn-danger" 
+                                            title="Excluir"
+                                            onclick="if(confirm('Tem certeza que deseja excluir esta ferramenta?')) { document.getElementById('delete-<%= tool.id %>').submit(); }"
+                                        >
+                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                        <form id="delete-<%= tool.id %>" action="/admin/ai-tools/<%= tool.id %>/delete" method="POST" style="display: none;"></form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="admin-card">
+            <div class="admin-card-body" style="text-align: center; padding: 3rem 1.5rem;">
+                <svg style="width: 4rem; height: 4rem; margin: 0 auto 1rem; color: var(--admin-text-tertiary);" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <p style="color: var(--admin-text-secondary); margin-bottom: 1.5rem;">
+                    Nenhuma ferramenta cadastrada ainda
+                </p>
+                <a href="/admin/ai-tools/new" class="admin-btn admin-btn-primary">
+                    <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Criar Primeira Ferramenta
+                </a>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

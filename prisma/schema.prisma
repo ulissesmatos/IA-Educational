@@ -111,6 +111,34 @@ model Answer {
 
 // ==================== CATÁLOGO DE IAs ====================
 
+// ==================== ADMIN ====================
+
+// Usuários admin do painel
+model AdminUser {
+  id            String   @id @default(cuid())
+  email         String   @unique @db.VarChar(255)
+  passwordHash  String   @map("password_hash") @db.VarChar(255)
+  name          String   @db.VarChar(100)
+  isActive      Boolean  @default(true) @map("is_active")
+  lastLoginAt   DateTime? @map("last_login_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+// Sessões de admin (para express-session com connect-pg-simple)
+model Session {
+  sid       String   @id @db.VarChar(255)
+  sess      Json
+  expire    DateTime
+
+  @@index([expire])
+  @@map("session")
+}
+
+// ==================== CATÁLOGO DE IAs ====================
+
 // Tipos de precificação de ferramentas IA
 enum PricingType {
   FREE      // Totalmente gratuito

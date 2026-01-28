@@ -1,0 +1,264 @@
+<%- include('../partials/header') %>
+
+<div class="admin-header">
+    <div>
+        <h1 class="admin-page-title">
+            <%= tool ? 'Editar Ferramenta IA' : 'Nova Ferramenta IA' %>
+        </h1>
+        <p class="admin-page-description">
+            <%= tool ? 'Atualize os dados da ferramenta' : 'Adicione uma nova ferramenta ao catálogo' %>
+        </p>
+    </div>
+    <a href="/admin/ai-tools" class="admin-btn admin-btn-secondary">
+        <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Voltar
+    </a>
+</div>
+
+<div class="admin-content">
+    <% if (errors && errors.length > 0) { %>
+        <div class="admin-alert admin-alert-danger">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+                <% errors.forEach(error => { %>
+                    <p><%= error.msg %></p>
+                <% }); %>
+            </div>
+        </div>
+    <% } %>
+    
+    <form action="<%= tool ? `/admin/ai-tools/${tool.id}` : '/admin/ai-tools' %>" method="POST">
+        <!-- Informações Básicas -->
+        <div class="admin-card" style="margin-bottom: 1.5rem;">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">Informações Básicas</h2>
+            </div>
+            <div class="admin-card-body">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        Nome da Ferramenta
+                        <span style="color: var(--admin-danger);">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="name" 
+                        class="admin-form-input"
+                        value="<%= tool ? tool.name : (formData ? formData.name : '') %>"
+                        required
+                        placeholder="Ex: ChatGPT"
+                    >
+                </div>
+                
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        Descrição Curta
+                        <span style="color: var(--admin-danger);">*</span>
+                    </label>
+                    <textarea 
+                        name="description" 
+                        class="admin-form-input" 
+                        rows="3" 
+                        required
+                        placeholder="Uma descrição concisa da ferramenta"
+                    ><%= tool ? tool.description : (formData ? formData.description : '') %></textarea>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        Descrição Longa
+                    </label>
+                    <textarea 
+                        name="longDescription" 
+                        class="admin-form-input" 
+                        rows="6"
+                        placeholder="Descrição detalhada da ferramenta, suas capacidades e uso"
+                    ><%= tool ? tool.longDescription || '' : (formData ? formData.longDescription || '' : '') %></textarea>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">
+                            Categoria
+                            <span style="color: var(--admin-danger);">*</span>
+                        </label>
+                        <select name="categoryId" class="admin-form-input" required>
+                            <option value="">Selecione uma categoria</option>
+                            <% if (categories && categories.length > 0) { %>
+                                <% categories.forEach(cat => { %>
+                                    <option 
+                                        value="<%= cat.id %>"
+                                        <%= (tool && tool.categoryId === cat.id) || (formData && formData.categoryId === cat.id.toString()) ? 'selected' : '' %>
+                                    >
+                                        <%= cat.name %>
+                                    </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                    
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">
+                            Preço
+                            <span style="color: var(--admin-danger);">*</span>
+                        </label>
+                        <select name="pricing" class="admin-form-input" required>
+                            <option value="free" <%= (tool && tool.pricing === 'free') || (formData && formData.pricing === 'free') ? 'selected' : '' %>>
+                                Grátis
+                            </option>
+                            <option value="freemium" <%= (tool && tool.pricing === 'freemium') || (formData && formData.pricing === 'freemium') || (!tool && !formData) ? 'selected' : '' %>>
+                                Freemium
+                            </option>
+                            <option value="paid" <%= (tool && tool.pricing === 'paid') || (formData && formData.pricing === 'paid') ? 'selected' : '' %>>
+                                Pago
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">
+                            URL do Site
+                            <span style="color: var(--admin-danger);">*</span>
+                        </label>
+                        <input 
+                            type="url" 
+                            name="url" 
+                            class="admin-form-input"
+                            value="<%= tool ? tool.url : (formData ? formData.url : '') %>"
+                            required
+                            placeholder="https://exemplo.com"
+                        >
+                    </div>
+                    
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">
+                            Ícone (Emoji)
+                        </label>
+                        <input 
+                            type="text" 
+                            name="icon" 
+                            class="admin-form-input"
+                            value="<%= tool ? tool.icon || '' : (formData ? formData.icon || '' : '') %>"
+                            placeholder="🤖"
+                            maxlength="2"
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Características -->
+        <div class="admin-card" style="margin-bottom: 1.5rem;">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">Características</h2>
+            </div>
+            <div class="admin-card-body">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        Recursos Principais
+                    </label>
+                    <textarea 
+                        name="features" 
+                        class="admin-form-input" 
+                        rows="4"
+                        placeholder="Um recurso por linha&#10;Geração de texto&#10;Tradução&#10;Análise de dados"
+                    ><%= tool && tool.features ? tool.features.join('\n') : (formData && formData.features ? formData.features : '') %></textarea>
+                    <p class="admin-form-help">Digite um recurso por linha</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">
+                            Pontos Positivos
+                        </label>
+                        <textarea 
+                            name="pros" 
+                            class="admin-form-input" 
+                            rows="4"
+                            placeholder="Um ponto por linha&#10;Fácil de usar&#10;Boa qualidade&#10;Rápido"
+                        ><%= tool && tool.pros ? tool.pros.join('\n') : (formData && formData.pros ? formData.pros : '') %></textarea>
+                        <p class="admin-form-help">Um ponto por linha</p>
+                    </div>
+                    
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">
+                            Pontos Negativos
+                        </label>
+                        <textarea 
+                            name="cons" 
+                            class="admin-form-input" 
+                            rows="4"
+                            placeholder="Um ponto por linha&#10;Requer cadastro&#10;Limitado na versão gratuita"
+                        ><%= tool && tool.cons ? tool.cons.join('\n') : (formData && formData.cons ? formData.cons : '') %></textarea>
+                        <p class="admin-form-help">Um ponto por linha</p>
+                    </div>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        Casos de Uso
+                    </label>
+                    <textarea 
+                        name="useCases" 
+                        class="admin-form-input" 
+                        rows="4"
+                        placeholder="Um caso de uso por linha&#10;Criar conteúdo para blog&#10;Responder dúvidas de alunos&#10;Gerar ideias criativas"
+                    ><%= tool && tool.useCases ? tool.useCases.join('\n') : (formData && formData.useCases ? formData.useCases : '') %></textarea>
+                    <p class="admin-form-help">Digite um caso de uso por linha</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status -->
+        <div class="admin-card" style="margin-bottom: 1.5rem;">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">Status e Visibilidade</h2>
+            </div>
+            <div class="admin-card-body">
+                <div class="admin-form-group">
+                    <label class="admin-checkbox-label">
+                        <input 
+                            type="checkbox" 
+                            name="isActive" 
+                            value="true"
+                            <%= (tool && tool.isActive) || (!tool && !formData) || (formData && formData.isActive === 'true') ? 'checked' : '' %>
+                        >
+                        <span>Ferramenta ativa (visível no catálogo)</span>
+                    </label>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label class="admin-checkbox-label">
+                        <input 
+                            type="checkbox" 
+                            name="isFeatured" 
+                            value="true"
+                            <%= (tool && tool.isFeatured) || (formData && formData.isFeatured === 'true') ? 'checked' : '' %>
+                        >
+                        <span>Destacar ferramenta (aparece em destaque no dashboard)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ações -->
+        <div class="admin-card-footer">
+            <button type="submit" class="admin-btn admin-btn-primary">
+                <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <%= tool ? 'Atualizar Ferramenta' : 'Criar Ferramenta' %>
+            </button>
+            <a href="/admin/ai-tools" class="admin-btn admin-btn-secondary">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<%- include('../partials/footer') %>

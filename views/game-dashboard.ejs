@@ -8,201 +8,359 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/custom.css">
+  <style>
+    .page-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .action-cards-wrapper {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin: 3rem 0 4rem;
+    }
+
+    .action-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .action-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+      border-color: var(--accent-primary);
+    }
+
+    .action-card-top {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-icon-box {
+      width: 64px;
+      height: 64px;
+      background: var(--accent-glow);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+      flex-shrink: 0;
+    }
+
+    .card-title-area h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .card-description {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-footer-link {
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--accent-primary);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: auto;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .info-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .info-number {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--accent-glow);
+      color: var(--accent-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    .info-box h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin: 0 0 0.75rem;
+    }
+
+    .info-box p {
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .content-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .content-icon-box {
+      width: 56px;
+      height: 56px;
+      background: var(--bg-tertiary);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+      flex-shrink: 0;
+    }
+
+    .content-item h4 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+    }
+
+    .content-item p {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    @media (max-width: 992px) {
+      .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .action-cards-wrapper {
+        grid-template-columns: 1fr;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .content-grid {
+        grid-template-columns: 1fr;
+        padding: 2rem 1.5rem;
+      }
+      
+      .page-container {
+        padding: 1.5rem 1rem;
+      }
+    }
+  </style>
 </head>
 <body class="gradient-bg min-h-screen">
   
-  <!-- Background Decoration -->
   <div style="position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;">
     <div style="position: absolute; top: -20%; left: -10%; width: 40%; height: 40%; background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);"></div>
     <div style="position: absolute; bottom: -20%; right: -10%; width: 50%; height: 50%; background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%);"></div>
   </div>
 
-  <div class="container container-lg py-8" style="position: relative; z-index: 1;">
+  <div class="page-container" style="position: relative; z-index: 1;">
     
-    <!-- Back Button -->
-    <a href="/" class="btn btn-secondary mb-6 animate-fadeInDown" style="display: inline-flex; align-items: center; gap: 8px;">
-      <%- include('icons/arrow-left', { size: 18 }) %>
-      Voltar ao início
-    </a>
+    <div class="animate-fadeInDown" style="margin-bottom: 2rem;">
+      <a href="/" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <%- include('icons/arrow-left', { size: 18 }) %>
+        Voltar ao início
+      </a>
+    </div>
     
-    <!-- Header -->
-    <header class="text-center mb-8 animate-fadeInDown" style="animation-delay: 50ms;">
-      <div class="animate-float" style="display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-dark)); border-radius: 20px; margin-bottom: 1.5rem; color: white;">
+    <header class="text-center animate-fadeInDown" style="margin-bottom: 3rem; animation-delay: 50ms;">
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-dark)); border-radius: 20px; margin-bottom: 1.5rem; color: white;">
         <%- include('icons/puzzle-piece', { size: 48 }) %>
       </div>
-      <h1 class="text-display gradient-text mb-2">IA ou Não?</h1>
-      <p class="text-caption" style="max-width: 500px; margin: 0 auto;">
+      <h1 class="text-display gradient-text" style="margin-bottom: 0.75rem;">IA ou Não?</h1>
+      <p class="text-body" style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
         Quiz interativo para testar se você consegue distinguir conteúdo criado por IA de conteúdo humano
       </p>
     </header>
 
-    <!-- Main Cards Grid -->
-    <div class="grid gap-6 mb-8 animate-fadeInUp" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 800px; margin: 0 auto; animation-delay: 100ms;">
+    <div class="action-cards-wrapper animate-fadeInUp" style="animation-delay: 100ms;">
       
-      <!-- Card: Criar Sala (Para Professores/Facilitadores) -->
-      <a href="/host" class="card card-hover" style="text-decoration: none; padding: 2rem;">
-        <div class="flex items-start gap-4">
-          <div style="display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: var(--accent-glow); border-radius: 14px; flex-shrink: 0; color: var(--accent-primary);">
-            <%- include('icons/tv', { size: 28 }) %>
+      <a href="/host" class="action-card">
+        <div class="action-card-top">
+          <div class="card-icon-box">
+            <%- include('icons/tv', { size: 32 }) %>
           </div>
-          <div style="flex: 1;">
-            <div class="flex items-center gap-2 mb-2">
-              <h2 class="text-title">Criar Sala</h2>
-              <span class="badge badge-primary">HOST</span>
-            </div>
-            <p class="text-caption mb-3" style="color: var(--text-secondary);">
-              Crie uma sala para apresentar o quiz na tela principal. Ideal para professores e facilitadores.
-            </p>
-            <div class="flex gap-2 flex-wrap">
-              <span class="badge badge-neutral" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
-                <%- include('icons/presentation-chart-bar', { size: 12 }) %> Apresentação
-              </span>
-              <span class="badge badge-neutral" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
-                <%- include('icons/adjustments-horizontal', { size: 12 }) %> Controle total
-              </span>
-            </div>
+          <div class="card-title-area">
+            <h2>Criar Sala</h2>
+            <span class="badge badge-primary">HOST</span>
           </div>
         </div>
-        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-          <span class="text-small" style="color: var(--accent-primary); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
-            Criar nova sala <%- include('icons/arrow-right', { size: 14 }) %>
+        
+        <p class="card-description">
+          Crie uma sala para apresentar o quiz na tela principal. Ideal para professores e facilitadores.
+        </p>
+        
+        <div class="card-tags">
+          <span class="badge badge-neutral" style="font-size: 0.875rem;">
+            <%- include('icons/presentation-chart-bar', { size: 14 }) %> Apresentação
           </span>
+          <span class="badge badge-neutral" style="font-size: 0.875rem;">
+            <%- include('icons/adjustments-horizontal', { size: 14 }) %> Controle total
+          </span>
+        </div>
+        
+        <div class="card-footer-link">
+          Criar nova sala
+          <%- include('icons/arrow-right', { size: 16 }) %>
         </div>
       </a>
 
-      <!-- Card: Entrar em Sala (Para Alunos/Participantes) -->
-      <a href="/join" class="card card-hover" style="text-decoration: none; padding: 2rem;">
-        <div class="flex items-start gap-4">
-          <div style="display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: var(--accent-glow); border-radius: 14px; flex-shrink: 0; color: var(--accent-primary);">
-            <%- include('icons/cursor-arrow-rays', { size: 28 }) %>
+      <a href="/join" class="action-card">
+        <div class="action-card-top">
+          <div class="card-icon-box">
+            <%- include('icons/cursor-arrow-rays', { size: 32 }) %>
           </div>
-          <div style="flex: 1;">
-            <div class="flex items-center gap-2 mb-2">
-              <h2 class="text-title">Entrar em Sala</h2>
-              <span class="badge badge-success">JOGAR</span>
-            </div>
-            <p class="text-caption mb-3" style="color: var(--text-secondary);">
-              Tem um código de sala? Entre aqui para participar do quiz em tempo real.
-            </p>
-            <div class="flex gap-2 flex-wrap">
-              <span class="badge badge-neutral" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
-                <%- include('icons/device-phone-mobile', { size: 12 }) %> Mobile friendly
-              </span>
-              <span class="badge badge-neutral" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
-                <%- include('icons/bolt', { size: 12 }) %> Tempo real
-              </span>
-            </div>
+          <div class="card-title-area">
+            <h2>Entrar em Sala</h2>
+            <span class="badge badge-success">JOGAR</span>
           </div>
         </div>
-        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-          <span class="text-small" style="color: var(--accent-primary); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
-            Inserir código <%- include('icons/arrow-right', { size: 14 }) %>
+        
+        <p class="card-description">
+          Tem um código de sala? Entre aqui para participar do quiz em tempo real.
+        </p>
+        
+        <div class="card-tags">
+          <span class="badge badge-neutral" style="font-size: 0.875rem;">
+            <%- include('icons/device-phone-mobile', { size: 14 }) %> Mobile friendly
           </span>
+          <span class="badge badge-neutral" style="font-size: 0.875rem;">
+            <%- include('icons/bolt', { size: 14 }) %> Tempo real
+          </span>
+        </div>
+        
+        <div class="card-footer-link">
+          Inserir código
+          <%- include('icons/arrow-right', { size: 16 }) %>
         </div>
       </a>
     </div>
 
-    <!-- How it Works Section -->
-    <section class="animate-fadeInUp" style="animation-delay: 200ms; max-width: 800px; margin: 0 auto;">
-      <h2 class="text-headline mb-6 text-center" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <%- include('icons/question-mark-circle', { size: 24, className: 'icon-primary' }) %>
+    <section class="animate-fadeInUp" style="animation-delay: 200ms;">
+      <h2 class="text-headline text-center" style="margin-bottom: 2.5rem;">
+        <%- include('icons/question-mark-circle', { size: 28 }) %>
         Como funciona?
       </h2>
       
-      <div class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-        
-        <!-- Step 1 -->
-        <div class="card" style="padding: 1.5rem; text-align: center;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--accent-glow); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 700; font-size: 1.25rem;">
-            1
-          </div>
-          <h3 class="text-body" style="font-weight: 600; margin-bottom: 0.5rem;">Professor cria sala</h3>
-          <p class="text-small" style="color: var(--text-muted);">
-            O facilitador cria uma sala e projeta na tela
-          </p>
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="info-number">1</div>
+          <h3>Professor cria sala</h3>
+          <p>O facilitador cria uma sala e projeta na tela</p>
         </div>
         
-        <!-- Step 2 -->
-        <div class="card" style="padding: 1.5rem; text-align: center;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--accent-glow); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 700; font-size: 1.25rem;">
-            2
-          </div>
-          <h3 class="text-body" style="font-weight: 600; margin-bottom: 0.5rem;">Alunos entram</h3>
-          <p class="text-small" style="color: var(--text-muted);">
-            Participantes escaneiam QR code ou digitam o código
-          </p>
+        <div class="info-box">
+          <div class="info-number">2</div>
+          <h3>Alunos entram</h3>
+          <p>Participantes escaneiam QR code ou digitam o código</p>
         </div>
         
-        <!-- Step 3 -->
-        <div class="card" style="padding: 1.5rem; text-align: center;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--accent-glow); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 700; font-size: 1.25rem;">
-            3
-          </div>
-          <h3 class="text-body" style="font-weight: 600; margin-bottom: 0.5rem;">Votam em tempo real</h3>
-          <p class="text-small" style="color: var(--text-muted);">
-            Cada um vota se o conteúdo foi feito por IA ou humano
-          </p>
+        <div class="info-box">
+          <div class="info-number">3</div>
+          <h3>Votam em tempo real</h3>
+          <p>Cada um vota se o conteúdo foi feito por IA ou humano</p>
         </div>
         
-        <!-- Step 4 -->
-        <div class="card" style="padding: 1.5rem; text-align: center;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--accent-glow); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 700; font-size: 1.25rem;">
-            4
-          </div>
-          <h3 class="text-body" style="font-weight: 600; margin-bottom: 0.5rem;">Ranking final</h3>
-          <p class="text-small" style="color: var(--text-muted);">
-            Veja quem acertou mais no ranking final
-          </p>
+        <div class="info-box">
+          <div class="info-number">4</div>
+          <h3>Ranking final</h3>
+          <p>Veja quem acertou mais no ranking final</p>
         </div>
       </div>
     </section>
 
-    <!-- Content Types Section -->
-    <section class="mt-8 animate-fadeInUp" style="animation-delay: 300ms; max-width: 800px; margin-left: auto; margin-right: auto;">
-      <h2 class="text-headline mb-6 text-center" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <%- include('icons/squares-2x2', { size: 24, className: 'icon-primary' }) %>
+    <section class="animate-fadeInUp" style="animation-delay: 300ms;">
+      <h2 class="text-headline text-center" style="margin-bottom: 2.5rem;">
+        <%- include('icons/squares-2x2', { size: 28 }) %>
         Tipos de conteúdo
       </h2>
       
-      <div class="card" style="padding: 1.5rem;">
-        <div class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
-          
-          <div class="flex items-center gap-3">
-            <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; color: var(--accent-primary);">
-              <%- include('icons/photo', { size: 20 }) %>
-            </div>
-            <div>
-              <span class="text-body" style="font-weight: 600;">Imagens</span>
-              <p class="text-small" style="color: var(--text-muted);">Fotos e ilustrações</p>
-            </div>
+      <div class="content-grid">
+        <div class="content-item">
+          <div class="content-icon-box">
+            <%- include('icons/photo', { size: 28 }) %>
           </div>
-          
-          <div class="flex items-center gap-3">
-            <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; color: var(--accent-primary);">
-              <%- include('icons/document-text', { size: 20 }) %>
-            </div>
-            <div>
-              <span class="text-body" style="font-weight: 600;">Textos</span>
-              <p class="text-small" style="color: var(--text-muted);">Artigos e redações</p>
-            </div>
+          <div>
+            <h4>Imagens</h4>
+            <p>Fotos e ilustrações</p>
           </div>
-          
-          <div class="flex items-center gap-3">
-            <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; color: var(--accent-primary);">
-              <%- include('icons/magnifying-glass', { size: 20 }) %>
-            </div>
-            <div>
-              <span class="text-body" style="font-weight: 600;">Alucinações</span>
-              <p class="text-small" style="color: var(--text-muted);">Fatos verdadeiros ou falsos</p>
-            </div>
+        </div>
+        
+        <div class="content-item">
+          <div class="content-icon-box">
+            <%- include('icons/document-text', { size: 28 }) %>
           </div>
-          
+          <div>
+            <h4>Textos</h4>
+            <p>Artigos e redações</p>
+          </div>
+        </div>
+        
+        <div class="content-item">
+          <div class="content-icon-box">
+            <%- include('icons/magnifying-glass', { size: 28 }) %>
+          </div>
+          <div>
+            <h4>Alucinações</h4>
+            <p>Fatos verdadeiros ou falsos</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="mt-8 text-center animate-fadeInUp" style="animation-delay: 400ms;">
+    <footer class="text-center animate-fadeInUp" style="animation-delay: 400ms; margin-top: 3rem;">
       <p class="text-small" style="color: var(--text-muted);">
         Desenvolvido para uso educacional
       </p>

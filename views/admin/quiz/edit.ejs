@@ -1,0 +1,176 @@
+<%- include('../partials/header') %>
+
+<div class="admin-header">
+    <div>
+        <h1 class="admin-page-title">
+            <%= question ? 'Editar Pergunta' : 'Nova Pergunta' %>
+        </h1>
+        <p class="admin-page-description">
+            <%= question ? 'Atualize os dados da pergunta' : 'Crie uma nova pergunta para o quiz' %>
+        </p>
+    </div>
+    <a href="/admin/quiz" class="admin-btn admin-btn-secondary">
+        <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Voltar
+    </a>
+</div>
+
+<div class="admin-content">
+    <% if (errors && errors.length > 0) { %>
+        <div class="admin-alert admin-alert-danger">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+                <% errors.forEach(error => { %>
+                    <p><%= error.msg %></p>
+                <% }); %>
+            </div>
+        </div>
+    <% } %>
+    
+    <div class="admin-card">
+        <form action="<%= question ? `/admin/quiz/${question.id}` : '/admin/quiz' %>" method="POST">
+            <div class="admin-card-body">
+                <!-- Texto da Pergunta -->
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        Texto da Pergunta
+                        <span style="color: var(--admin-danger);">*</span>
+                    </label>
+                    <textarea 
+                        name="text" 
+                        class="admin-form-input" 
+                        rows="3" 
+                        required
+                        placeholder="Ex: Esta imagem foi gerada por IA?"
+                    ><%= question ? question.text : (formData ? formData.text : '') %></textarea>
+                    <p class="admin-form-help">Escreva a pergunta que será exibida aos jogadores</p>
+                </div>
+                
+                <!-- Categoria -->
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        Categoria
+                    </label>
+                    <input 
+                        type="text" 
+                        name="category" 
+                        class="admin-form-input"
+                        value="<%= question ? question.category || '' : (formData ? formData.category || '' : '') %>"
+                        placeholder="Ex: Imagens, Textos, Música"
+                    >
+                    <p class="admin-form-help">Categoria da pergunta (opcional)</p>
+                </div>
+                
+                <!-- Resposta Correta -->
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        Resposta Correta
+                        <span style="color: var(--admin-danger);">*</span>
+                    </label>
+                    <div style="display: flex; gap: 1rem;">
+                        <label class="admin-radio-label">
+                            <input 
+                                type="radio" 
+                                name="correctAnswer" 
+                                value="true"
+                                <%= (question && question.correctAnswer) || (formData && formData.correctAnswer === 'true') ? 'checked' : '' %>
+                                required
+                            >
+                            <span>IA (Verdadeiro)</span>
+                        </label>
+                        <label class="admin-radio-label">
+                            <input 
+                                type="radio" 
+                                name="correctAnswer" 
+                                value="false"
+                                <%= (question && !question.correctAnswer) || (formData && formData.correctAnswer === 'false') ? 'checked' : '' %>
+                                required
+                            >
+                            <span>Não IA (Falso)</span>
+                        </label>
+                    </div>
+                    <p class="admin-form-help">Selecione se o conteúdo foi criado por IA ou não</p>
+                </div>
+                
+                <!-- Explicação -->
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        Explicação
+                    </label>
+                    <textarea 
+                        name="explanation" 
+                        class="admin-form-input" 
+                        rows="4"
+                        placeholder="Ex: Esta imagem apresenta características típicas de IA como..."
+                    ><%= question ? question.explanation || '' : (formData ? formData.explanation || '' : '') %></textarea>
+                    <p class="admin-form-help">Explicação que será mostrada após a resposta (opcional)</p>
+                </div>
+                
+                <!-- URL da Imagem -->
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        URL da Imagem
+                    </label>
+                    <input 
+                        type="url" 
+                        name="imageUrl" 
+                        class="admin-form-input"
+                        value="<%= question ? question.imageUrl || '' : (formData ? formData.imageUrl || '' : '') %>"
+                        placeholder="https://exemplo.com/imagem.jpg"
+                    >
+                    <p class="admin-form-help">URL da imagem relacionada à pergunta (opcional)</p>
+                </div>
+                
+                <!-- Dificuldade -->
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
+                        Dificuldade
+                    </label>
+                    <select name="difficulty" class="admin-form-input">
+                        <option value="easy" <%= (question && question.difficulty === 'easy') || (formData && formData.difficulty === 'easy') ? 'selected' : '' %>>
+                            Fácil
+                        </option>
+                        <option value="medium" <%= (question && question.difficulty === 'medium') || (formData && formData.difficulty === 'medium') || (!question && !formData) ? 'selected' : '' %>>
+                            Média
+                        </option>
+                        <option value="hard" <%= (question && question.difficulty === 'hard') || (formData && formData.difficulty === 'hard') ? 'selected' : '' %>>
+                            Difícil
+                        </option>
+                    </select>
+                    <p class="admin-form-help">Nível de dificuldade da pergunta</p>
+                </div>
+                
+                <!-- Status Ativo -->
+                <div class="admin-form-group">
+                    <label class="admin-checkbox-label">
+                        <input 
+                            type="checkbox" 
+                            name="isActive" 
+                            value="true"
+                            <%= (question && question.isActive) || (!question && !formData) || (formData && formData.isActive === 'true') ? 'checked' : '' %>
+                        >
+                        <span>Pergunta ativa (disponível para uso no jogo)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="admin-card-footer">
+                <button type="submit" class="admin-btn admin-btn-primary">
+                    <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <%= question ? 'Atualizar Pergunta' : 'Criar Pergunta' %>
+                </button>
+                <a href="/admin/quiz" class="admin-btn admin-btn-secondary">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

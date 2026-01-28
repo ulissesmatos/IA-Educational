@@ -14,6 +14,7 @@ import { setupSocketHandlers } from './realtime/socketHandler.js';
 import apiRoutes from './routes/api.js';
 import pageRoutes from './routes/pages.js';
 import { gameService } from './services/gameService.js';
+import { setupAdmin } from './admin-setup.js';
 
 // ES Module path handling
 const __filename = fileURLToPath(import.meta.url);
@@ -46,6 +47,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
 
+// Setup Admin (segurança, sessões e rotas admin)
+setupAdmin(app);
+
 // Rotas
 app.use('/api', apiRoutes);
 app.use('/', pageRoutes);
@@ -54,16 +58,19 @@ app.use('/', pageRoutes);
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('❌ Erro:', err.message);
   
-  res.status(500).json({
-    error: NODE_ENV === 'development' ? err.message : 'Erro interno do servidor',
+  res.status(500).render('error', {
+    statusCode: 500,
+    title: 'Erro interno',
+    message: NODE_ENV === 'development' ? err.message : 'Ocorreu um erro interno no servidor.',
   });
 });
 
-// 404
+// 404 - Página não encontrada
 app.use((_req: Request, res: Response) => {
-  res.status(404).render('join', { 
+  res.status(404).render('error', { 
+    statusCode: 404,
     title: 'Página não encontrada',
-    error: 'Página não encontrada',
+    message: 'A página que você está procurando não existe ou foi movida.',
   });
 });
 
@@ -99,6 +106,8 @@ async function start(): Promise<void> {
   httpServer.listen(PORT, () => {
     console.log(`\n✅ Servidor rodando em http://localhost:${PORT}`);
     console.log(`\n📱 Rotas disponíveis:`);
+    console.log(`   - GET  /admin/login    → Login do administrador`);
+    console.log(`   - GET  /admin          → Painel admin`);
     console.log(`   - GET  /host           → Painel do facilitador`);
     console.log(`   - GET  /join           → Tela de entrada`);
     console.log(`   - GET  /play/:code     → Tela do jogador`);

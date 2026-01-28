@@ -254,7 +254,7 @@ async function main() {
       logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg',
       categorySlug: 'chat-texto',
       pricingType: 'FREEMIUM' as PricingType,
-      pricingDetails: 'Grátis (GPT-3.5) / Plus $20/mês (GPT-4)',
+      pricingDetails: 'Grátis (GPT-5) / Plus $20/mês (GPT-5.2)',
       features: ['Conversação natural', 'Escrita criativa', 'Análise de código', 'Visão (GPT-4)', 'Plugins'],
       pros: ['Muito versátil', 'Fácil de usar', 'Boa qualidade de respostas'],
       cons: ['Limite de mensagens no plano grátis', 'Pode inventar informações'],
