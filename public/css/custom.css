@@ -18,7 +18,18 @@
   --text-muted: #9CA3AF;
   --text-light: #D1D5DB;
   
-  /* Azuis Suaves - Modernos */
+  /* Cores da Marca - Jornada Pedagógica Moderna */
+  --cyan: #00C9E0;
+  --cyan-light: #33D7E8;
+  --cyan-dark: #00A3B8;
+  --golden: #F5B800;
+  --golden-light: #F7C933;
+  --golden-dark: #D99F00;
+  --navy: #0B1E3F;
+  --navy-light: #1A3B5F;
+  --navy-dark: #071528;
+  
+  /* Azuis Modernos (secundário) */
   --blue-50: #EFF6FF;
   --blue-100: #DBEAFE;
   --blue-200: #BFDBFE;
@@ -27,21 +38,45 @@
   --blue-500: #3B82F6;
   --blue-600: #2563EB;
   --blue-700: #1D4ED8;
+  --blue-900: var(--navy);
   
-  /* Accent Principal */
-  --accent-primary: var(--blue-600);
-  --accent-light: var(--blue-400);
-  --accent-dark: var(--blue-700);
-  --accent-subtle: var(--blue-50);
-  --accent-glow: rgba(37, 99, 235, 0.08);
+  /* Accent Principal - Cyan Vibrante */
+  --accent-primary: var(--cyan);
+  --accent-light: var(--cyan-light);
+  --accent-dark: var(--cyan-dark);
+  --accent-subtle: #E5F8FB;
+  --accent-glow: rgba(0, 201, 224, 0.08);
+  
+  /* Accent Secundário - Dourado */
+  --accent-secondary: var(--golden);
+  --accent-secondary-light: var(--golden-light);
+  --accent-secondary-dark: var(--golden-dark);
+  --accent-secondary-subtle: #FEF8E5;
+  --accent-secondary-glow: rgba(245, 184, 0, 0.08);
+  
+  /* Opacity Variants - Cyan */
+  --accent-10: rgba(0, 201, 224, 0.1);
+  --accent-20: rgba(0, 201, 224, 0.2);
+  --accent-30: rgba(0, 201, 224, 0.3);
+  
+  /* Opacity Variants - Golden */
+  --secondary-10: rgba(245, 184, 0, 0.1);
+  --secondary-20: rgba(245, 184, 0, 0.2);
+  --secondary-30: rgba(245, 184, 0, 0.3);
   
   /* Cores de Estado - Suaves */
-  --success: #059669;
+  --success: #22C55E;
+  --success-light: #4ADE80;
   --success-bg: #ECFDF5;
+  --success-10: rgba(34, 197, 94, 0.1);
   --error: #DC2626;
+  --error-light: #F87171;
   --error-bg: #FEF2F2;
-  --warning: #D97706;
-  --warning-bg: #FFFBEB;
+  --error-10: rgba(220, 38, 38, 0.1);
+  --warning: #FF6B35;
+  --warning-light: #FF8A5C;
+  --warning-bg: #FFF3EF;
+  --warning-10: rgba(255, 107, 53, 0.1);
   
   /* Bordas Ultra Suaves */
   --border-light: #F3F4F6;
@@ -54,8 +89,8 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --shadow-glow: 0 0 0 1px rgba(37, 99, 235, 0.05), 0 1px 3px rgba(37, 99, 235, 0.1);
-  --shadow-spotlight: 0 0 0 1px rgba(37, 99, 235, 0.08), 0 8px 24px -4px rgba(37, 99, 235, 0.15);
+  --shadow-glow: 0 0 0 1px rgba(0, 201, 224, 0.05), 0 1px 3px rgba(0, 201, 224, 0.1);
+  --shadow-spotlight: 0 0 0 1px rgba(0, 201, 224, 0.08), 0 8px 24px -4px rgba(0, 201, 224, 0.15);
   
   /* Border Radius Moderno */
   --radius-sm: 6px;

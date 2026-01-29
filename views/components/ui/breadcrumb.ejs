@@ -1,0 +1,28 @@
+<%
+  // Breadcrumb navigation component
+  const items = typeof breadcrumbItems !== 'undefined' ? breadcrumbItems : [];
+%>
+<% if (items && items.length > 0) { %>
+<nav class="breadcrumb" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+  <% items.forEach(function(item, index) { %>
+    <% if (index > 0) { %>
+      <span class="text-caption" style="color: var(--text-muted);">›</span>
+    <% } %>
+    <% if (item.url) { %>
+      <a href="<%= item.url %>" class="text-small" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+        <% if (item.icon) { %>
+          <%- include(`../../icons/${item.icon}`, { size: 14 }) %>
+        <% } %>
+        <%= item.label %>
+      </a>
+    <% } else { %>
+      <span class="text-small" style="color: var(--text-primary); font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem;">
+        <% if (item.icon) { %>
+          <%- include(`../../icons/${item.icon}`, { size: 14 }) %>
+        <% } %>
+        <%= item.label %>
+      </span>
+    <% } %>
+  <% }); %>
+</nav>
+<% } %>

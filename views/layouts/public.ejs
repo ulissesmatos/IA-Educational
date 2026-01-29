@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<%- include('../partials/head', { title: title || 'IA ou Não?' }) %>
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : 'gradient-bg min-h-screen' %>">
+  
+  <%- include('../components/ui/background-decoration') %>
+  
+  <% if (typeof showHeader === 'undefined' || showHeader !== false) { %>
+    <%- include('../partials/public-header', { currentPath: currentPath || '/' }) %>
+  <% } %>
+  
+  <main class="<%= typeof mainClass !== 'undefined' ? mainClass : 'container container-lg' %>" style="<%= typeof mainStyle !== 'undefined' ? mainStyle : 'padding-top: 2rem; padding-bottom: 3rem; position: relative; z-index: 1;' %>">
+    <%- body %>
+  </main>
+  
+  <% if (typeof showFooter === 'undefined' || showFooter !== false) { %>
+    <%- include('../partials/public-footer') %>
+  <% } %>
+  
+  <% if (typeof includeSocketIO !== 'undefined' && includeSocketIO === true) { %>
+    <script src="/socket.io/socket.io.js"></script>
+  <% } %>
+</body>
+</html>

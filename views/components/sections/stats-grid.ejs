@@ -1,0 +1,44 @@
+<%
+  // Stats grid component showing catalog statistics
+  const cats = typeof categories !== 'undefined' ? categories : [];
+  const statistics = typeof stats !== 'undefined' ? stats : { FREE: 0, FREEMIUM: 0, PAID: 0 };
+  const tools = typeof featuredTools !== 'undefined' ? featuredTools : [];
+%>
+<section class="animate-fadeInUp" style="animation-delay: 300ms; padding-top: 1rem; padding-bottom: 1rem; border-top: 1px solid var(--border-light);">
+  <div class="card" style="padding: 2.5rem;">
+    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 2.5rem; text-align: center;">
+      <div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+          <%= cats.reduce((sum, c) => sum + c.toolCount, 0) %>
+        </div>
+        <div class="text-caption" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <%- include('../../icons/cpu-chip', { size: 16 }) %> Ferramentas
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--success); margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+          <%= statistics.FREE + statistics.FREEMIUM %>
+        </div>
+        <div class="text-caption" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <%- include('../../icons/check-circle', { size: 16 }) %> Com opção grátis
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--warning); margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+          <%= cats.length %>
+        </div>
+        <div class="text-caption" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <%- include('../../icons/folder', { size: 16 }) %> Categorias
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-dark); margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+          <%= tools.length %>
+        </div>
+        <div class="text-caption" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <%- include('../../icons/star', { size: 16 }) %> Em destaque
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -12,7 +12,7 @@ const router = Router();
 /**
  * GET / - Dashboard principal
  */
-router.get('/', async (_req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const categories = await aiCatalogService.getCategories();
     const featuredTools = await aiCatalogService.getFeaturedTools();
@@ -20,6 +20,7 @@ router.get('/', async (_req: Request, res: Response) => {
     
     res.render('dashboard', { 
       title: 'IA na Educação - Dashboard',
+      currentPath: req.path,
       categories,
       featuredTools,
       stats,
@@ -28,6 +29,7 @@ router.get('/', async (_req: Request, res: Response) => {
     console.error('Erro ao carregar dashboard:', error);
     res.render('dashboard', { 
       title: 'IA na Educação - Dashboard',
+      currentPath: req.path,
       categories: [],
       featuredTools: [],
       stats: { FREE: 0, FREEMIUM: 0, PAID: 0 },
@@ -66,6 +68,7 @@ router.get('/ias', async (req: Request, res: Response) => {
       title: currentCategory 
         ? `${currentCategory.icon} ${currentCategory.name} - Catálogo de IAs`
         : 'Catálogo de IAs - IA na Educação',
+      currentPath: req.path,
       categories,
       tools,
       currentCategory,
@@ -80,6 +83,7 @@ router.get('/ias', async (req: Request, res: Response) => {
     console.error('Erro ao carregar catálogo:', error);
     res.render('ias', { 
       title: 'Catálogo de IAs - IA na Educação',
+      currentPath: req.path,
       categories: [],
       tools: [],
       currentCategory: null,
@@ -107,6 +111,7 @@ router.get('/ias/:slug', async (req: Request, res: Response) => {
     
     res.render('ia-detail', { 
       title: `${tool.name} - IA na Educação`,
+      currentPath: req.path,
       tool,
       relatedTools,
     });

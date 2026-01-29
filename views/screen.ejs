@@ -1,531 +1,719 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %></title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/custom.css">
+<%- include('partials/head', { title }) %>
+<body class="gradient-bg">
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
   <style>
-    /* Screen-specific overrides for projector display */
+    /* Layout base */
     html, body {
+      height: 100%;
       overflow: hidden;
-      cursor: none;
     }
     
-    .screen-text-huge {
-      font-size: clamp(2.5rem, 5vw, 4rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
+    .screen-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
     }
     
-    .screen-text-large {
-      font-size: clamp(1.5rem, 3vw, 2.5rem);
-      font-weight: 600;
+    .screen-header {
+      text-align: center;
+      padding-bottom: 1rem;
+      flex-shrink: 0;
     }
     
-    .screen-text-medium {
-      font-size: clamp(1.25rem, 2vw, 1.75rem);
+    .screen-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
     
-    .screen-text-body {
-      font-size: clamp(1rem, 1.5vw, 1.5rem);
-      line-height: 1.6;
+    /* Sections - all hidden by default */
+    .screen-section {
+      display: none;
+      width: 100%;
+      height: 100%;
     }
     
-    .screen-badge {
-      padding: 0.75rem 1.5rem;
-      font-size: clamp(0.875rem, 1.25vw, 1.25rem);
+    .screen-section.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
-    .screen-option {
-      padding: 1.25rem 1.5rem;
-      font-size: clamp(1rem, 1.5vw, 1.5rem);
+    /* Lobby specific */
+    .lobby-card {
+      width: 100%;
+      max-width: 900px;
     }
     
-    .screen-stat-bar {
+    /* Question/Result grid */
+    .game-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1200px;
+      align-self: flex-start;
+      padding-top: 1rem;
+    }
+    
+    .game-grid.active {
+      display: grid;
+    }
+    
+    /* Typography */
+    .screen-title {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .screen-room-code {
+      font-family: monospace;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--accent-primary);
+      letter-spacing: 0.15em;
+    }
+    
+    /* QR Code */
+    .qr-container {
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      display: inline-block;
+    }
+    
+    .qr-container canvas {
+      display: block;
+    }
+    
+    /* Stats bars */
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-letter {
+      width: 2.5rem;
       height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      font-weight: 700;
+      font-size: 1.125rem;
     }
     
-    .screen-ranking-item {
-      padding: 1rem 1.5rem;
-      font-size: clamp(1rem, 1.5vw, 1.5rem);
+    .stat-letter.correct {
+      background: var(--success);
+      color: white;
     }
     
-    .screen-ranking-position {
-      font-size: clamp(1.5rem, 2vw, 2.5rem);
+    .stat-bar-wrapper {
+      flex: 1;
+      height: 1.25rem;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-full);
+      overflow: hidden;
     }
     
-    /* Animated background gradient */
-    .animated-bg {
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, #0B1220 100%);
-      background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
+    .stat-bar-fill {
+      height: 100%;
+      background: var(--accent-primary);
+      border-radius: var(--radius-full);
+      transition: width 0.5s ease;
     }
     
-    @keyframes gradientShift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+    .stat-bar-fill.correct {
+      background: var(--success);
     }
     
-    /* Pulse glow effect for waiting states */
-    .glow-pulse {
-      animation: glowPulse 2s ease-in-out infinite;
+    .stat-percentage {
+      font-weight: 600;
+      min-width: 3.5rem;
+      text-align: right;
     }
     
-    @keyframes glowPulse {
-      0%, 100% { 
-        box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
-      }
-      50% { 
-        box-shadow: 0 0 60px rgba(59, 130, 246, 0.5), 0 0 100px rgba(59, 130, 246, 0.2);
-      }
+    /* Ranking items */
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.625rem 1rem;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.5rem;
+    }
+    
+    .rank-item.gold { background: linear-gradient(135deg, rgba(245,184,0,0.15), rgba(245,184,0,0.05)); border: 1px solid rgba(245,184,0,0.3); }
+    .rank-item.silver { background: linear-gradient(135deg, rgba(192,192,192,0.15), rgba(192,192,192,0.05)); border: 1px solid rgba(192,192,192,0.3); }
+    .rank-item.bronze { background: linear-gradient(135deg, rgba(205,127,50,0.15), rgba(205,127,50,0.05)); border: 1px solid rgba(205,127,50,0.3); }
+    
+    .rank-medal {
+      font-size: 1.25rem;
+    }
+    
+    .rank-name {
+      flex: 1;
+      font-weight: 500;
+    }
+    
+    .rank-score {
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+    
+    /* Player avatars */
+    .player-bubble {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    
+    /* Answer callout */
+    .answer-box {
+      padding: 1rem;
+      border-radius: var(--radius-lg);
+      margin-bottom: 0.75rem;
+    }
+    
+    .answer-box.success {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .answer-box.info {
+      background: rgba(0, 201, 224, 0.1);
+      border: 1px solid rgba(0, 201, 224, 0.3);
+    }
+    
+    /* Background decoration */
+    .bg-decoration {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .bg-decoration::before,
+    .bg-decoration::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+    }
+    
+    .bg-decoration::before {
+      top: -30%;
+      left: -20%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(circle, var(--accent-10) 0%, transparent 60%);
+    }
+    
+    .bg-decoration::after {
+      bottom: -30%;
+      right: -20%;
+      width: 70%;
+      height: 70%;
+      background: radial-gradient(circle, var(--accent-20) 0%, transparent 60%);
+    }
+    
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .confetti-piece {
+      position: absolute;
     }
   </style>
-</head>
-<body class="animated-bg min-h-screen screen-mode" style="padding: 2rem;">
-  
-  <!-- Background Decoration -->
-  <div style="position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;">
-    <div style="position: absolute; top: -30%; left: -20%; width: 60%; height: 60%; background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 60%);"></div>
-    <div style="position: absolute; bottom: -30%; right: -20%; width: 70%; height: 70%; background: radial-gradient(circle, rgba(96, 165, 250, 0.08) 0%, transparent 60%);"></div>
-  </div>
 
-  <div style="max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; height: calc(100vh - 4rem); display: flex; flex-direction: column;">
+  <!-- Background -->
+  <div class="bg-decoration"></div>
+
+  <div class="screen-container">
     
     <!-- Header -->
-    <header class="text-center" style="margin-bottom: 2rem; flex-shrink: 0;">
-      <div class="flex items-center justify-center gap-4 mb-2">
-        <span style="color: var(--accent-light);"><%- include('icons/cpu-chip', { size: 64 }) %></span>
-        <h1 class="screen-text-huge gradient-text">IA ou Não?</h1>
+    <header class="screen-header">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.5rem;">
+        <span style="color: var(--accent-primary);"><%- include('icons/cpu-chip', { size: 48 }) %></span>
+        <h1 class="screen-title">IA ou Não?</h1>
       </div>
-      <p class="screen-text-medium" style="color: var(--text-secondary);">
-        Sala: <span style="font-family: monospace; font-weight: 700; color: var(--accent-light); letter-spacing: 0.15em;"><%= roomCode %></span>
+      <p style="color: var(--text-secondary);">
+        Sala: <span class="screen-room-code"><%= roomCode %></span>
       </p>
     </header>
 
-    <!-- Main Content Area -->
-    <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+    <!-- Main Content -->
+    <main class="screen-main">
       
-      <!-- ==================== LOBBY STATE ==================== -->
-      <div id="lobby-section" class="animate-fadeInUp" style="flex: 1; display: flex; flex-direction: column;">
-        <div class="card glow-pulse text-center" style="flex: 1; padding: 3rem; display: flex; flex-direction: column; justify-content: center;">
-          
-          <div class="animate-float" style="margin-bottom: 2rem; color: var(--accent-light);">
-            <%- include('icons/clock', { size: 128 }) %>
-          </div>
-          
-          <h2 class="screen-text-huge mb-4" style="color: var(--text-primary);">Aguardando Participantes</h2>
-          
-          <!-- Join Instructions -->
-          <div style="background: rgba(37, 99, 235, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: var(--radius-xl); padding: 2rem; margin: 2rem auto; max-width: 600px;">
-            <p class="screen-text-medium" style="color: var(--accent-light); margin-bottom: 0.5rem;">Entre pelo celular em:</p>
-            <p id="join-url" class="screen-text-huge" style="font-family: monospace; color: var(--text-primary); word-break: break-all;"></p>
-            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(59, 130, 246, 0.2);">
-              <p class="screen-text-medium" style="color: var(--text-secondary);">
-                Código: <span style="font-family: monospace; font-weight: 700; color: var(--accent-light); font-size: 1.5em;"><%= roomCode %></span>
-              </p>
-            </div>
-          </div>
-          
-          <!-- Player Count -->
-          <div style="margin-top: 2rem;">
-            <p class="screen-text-medium" style="color: var(--text-secondary); margin-bottom: 1rem;">Participantes conectados</p>
-            <p id="lobby-player-count" class="screen-text-huge" style="color: var(--accent-light);">0</p>
-          </div>
-          
-          <!-- Player Avatars -->
-          <div id="lobby-players" class="flex flex-wrap justify-center gap-3" style="margin-top: 2rem;"></div>
-        </div>
-      </div>
-
-      <!-- ==================== QUESTION STATE ==================== -->
-      <div id="question-section" class="hidden" style="flex: 1; display: flex; gap: 2rem;">
-        
-        <!-- Main: Question -->
-        <div style="flex: 2; display: flex; flex-direction: column;">
-          <div class="card animate-fadeInUp" style="flex: 1; padding: 2rem; display: flex; flex-direction: column;">
+      <!-- ========== LOBBY ========== -->
+      <section id="sec-lobby" class="screen-section active">
+        <div class="lobby-card">
+          <div class="card" style="padding: 2rem;">
             
-            <!-- Question Header -->
-            <div class="flex justify-between items-center" style="margin-bottom: 1.5rem;">
-              <span id="question-type" class="badge badge-primary screen-badge"></span>
-              <span id="question-counter" class="badge badge-neutral screen-badge"></span>
-            </div>
+            <h2 class="text-headline mb-4" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+              <%- include('icons/clock', { size: 24 }) %>
+              Aguardando Participantes
+            </h2>
             
-            <!-- Question Image -->
-            <div id="question-image" class="hidden" style="margin-bottom: 1.5rem; flex-shrink: 0;">
-              <img id="question-img" src="" alt="Imagem da pergunta" 
-                   style="width: 100%; max-height: 40vh; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary);">
-            </div>
-            
-            <!-- Question Text -->
-            <p id="question-prompt" class="screen-text-body" style="white-space: pre-line; flex: 1; display: flex; align-items: center;"></p>
-            
-            <!-- Options (display only, not interactive) -->
-            <div id="options-container" class="space-y-3" style="margin-top: 2rem;"></div>
-          </div>
-        </div>
-        
-        <!-- Sidebar: Status + Ranking -->
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 1.5rem; min-width: 300px;">
-          
-          <!-- Response Status -->
-          <div class="card animate-fadeInUp" style="padding: 1.5rem; animation-delay: 100ms;">
-            <h3 class="screen-text-medium mb-4" style="display: flex; align-items: center; gap: 0.75rem;">
-              <%- include('icons/chart-bar', { size: 24 }) %> Respostas
-            </h3>
-            <div class="text-center">
-              <p style="font-size: clamp(3rem, 5vw, 5rem); font-weight: 800; color: var(--accent-light);">
-                <span id="answered-count">0</span>/<span id="total-players">0</span>
-              </p>
-              <p class="text-caption" style="margin-top: 0.5rem;">responderam</p>
-            </div>
-            <div id="waiting-indicator" class="text-center animate-pulse" style="margin-top: 1.5rem;">
-              <span style="color: var(--accent-light);"><%- include('icons/clock', { size: 32 }) %></span>
-              <p class="text-caption">Aguardando...</p>
-            </div>
-          </div>
-          
-          <!-- Ranking -->
-          <div class="card animate-fadeInUp" style="padding: 1.5rem; flex: 1; animation-delay: 150ms;">
-            <h3 class="screen-text-medium mb-4" style="display: flex; align-items: center; gap: 0.75rem;">
-              <%- include('icons/trophy', { size: 24 }) %> Top 5
-            </h3>
-            <div id="ranking-list" class="space-y-3"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ==================== RESULT STATE ==================== -->
-      <div id="result-section" class="hidden" style="flex: 1; display: flex; gap: 2rem;">
-        
-        <!-- Main: Result -->
-        <div style="flex: 2; display: flex; flex-direction: column;">
-          <div class="card animate-scaleIn" style="flex: 1; padding: 2rem; display: flex; flex-direction: column;">
-            
-            <!-- Header -->
-            <div class="flex justify-between items-center" style="margin-bottom: 1.5rem;">
-              <span id="result-type" class="badge badge-primary screen-badge"></span>
-              <span id="result-counter" class="badge badge-neutral screen-badge"></span>
-            </div>
-            
-            <!-- Image (smaller in result) -->
-            <div id="result-image" class="hidden" style="margin-bottom: 1rem;">
-              <img id="result-img" src="" alt="Imagem" 
-                   style="width: 100%; max-height: 25vh; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary);">
-            </div>
-            
-            <!-- Question Text -->
-            <p id="result-prompt" class="screen-text-body" style="white-space: pre-line; margin-bottom: 1.5rem; color: var(--text-secondary);"></p>
-            
-            <!-- Stats -->
-            <div id="stats-container" class="space-y-3" style="margin-bottom: 1.5rem;"></div>
-            
-            <!-- Correct Answer -->
-            <div class="callout callout-success" style="padding: 1.5rem; margin-bottom: 1rem;">
-              <span class="callout-icon" style="font-size: 2rem;"><%- include('icons/check-circle', { size: 32 }) %></span>
-              <div class="callout-content">
-                <p class="screen-text-medium" style="color: var(--success-light); margin-bottom: 0.25rem;">Resposta Correta</p>
-                <p id="correct-answer" class="screen-text-large" style="font-weight: 700;"></p>
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center; margin-bottom: 1.5rem;">
+              
+              <!-- Instructions -->
+              <div style="text-align: left;">
+                <h3 class="text-title mb-3" style="color: var(--accent-primary);">Como participar:</h3>
+                
+                <div class="mb-3">
+                  <p class="text-small text-muted mb-1">1. Acesse pelo celular:</p>
+                  <p id="join-url" style="font-family: monospace; color: var(--accent-primary); font-weight: 600; font-size: 1.125rem;"></p>
+                </div>
+                
+                <div class="mb-3">
+                  <p class="text-small text-muted mb-1">2. Digite o código:</p>
+                  <p style="font-family: monospace; font-weight: 700; color: var(--accent-primary); font-size: 2rem; letter-spacing: 0.2em;"><%= roomCode %></p>
+                </div>
+                
+                <div style="background: var(--accent-subtle); border: 1px solid var(--accent-20); border-radius: var(--radius-lg); padding: 1rem; margin-top: 1rem;">
+                  <p style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                    <%- include('icons/users', { size: 20 }) %>
+                    <span id="player-count" style="font-weight: 700; font-size: 1.5rem; color: var(--accent-primary);">0</span>
+                    <span class="text-secondary">participantes conectados</span>
+                  </p>
+                </div>
+              </div>
+              
+              <!-- QR Code -->
+              <div style="text-align: center;">
+                <div class="qr-container" id="qr-container"></div>
+                <p class="text-small text-muted" style="margin-top: 0.5rem;">Escaneie para entrar</p>
               </div>
             </div>
             
-            <!-- Explanation -->
-            <div class="callout callout-info" style="padding: 1.5rem; flex: 1;">
-              <span class="callout-icon" style="font-size: 1.5rem;"><%- include('icons/light-bulb', { size: 24 }) %></span>
-              <div class="callout-content">
-                <p class="screen-text-medium" style="margin-bottom: 0.5rem;">Explicação</p>
-                <p id="explanation" class="screen-text-body" style="color: var(--text-secondary);"></p>
+            <!-- Players -->
+            <div id="player-list" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;"></div>
+            
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== QUESTION ========== -->
+      <section id="sec-question" class="screen-section">
+        <div class="game-grid">
+          
+          <!-- Main content -->
+          <div>
+            <div class="card" style="padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <span id="q-type" class="badge badge-primary"></span>
+                <span id="q-counter" class="badge badge-neutral"></span>
+              </div>
+              
+              <div id="q-image-wrap" style="display: none; margin-bottom: 1rem;">
+                <img id="q-image" src="" alt="" style="width: 100%; max-height: 280px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary);">
+              </div>
+              
+              <p id="q-prompt" class="text-body mb-4" style="white-space: pre-line; font-size: 1.0625rem;"></p>
+              
+              <div id="q-options"></div>
+            </div>
+          </div>
+          
+          <!-- Sidebar -->
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <!-- Response counter -->
+            <div class="card" style="padding: 1.25rem; text-align: center;">
+              <h3 class="text-title mb-3" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <%- include('icons/chart-bar', { size: 20 }) %> Respostas
+              </h3>
+              <p style="font-size: 3rem; font-weight: 800; color: var(--accent-primary); line-height: 1;">
+                <span id="answered">0</span>/<span id="total">0</span>
+              </p>
+              <p class="text-small text-muted">responderam</p>
+            </div>
+            
+            <!-- Ranking -->
+            <div class="card" style="padding: 1.25rem; flex: 1;">
+              <h3 class="text-title mb-3" style="display: flex; align-items: center; gap: 0.5rem;">
+                <%- include('icons/trophy', { size: 20 }) %> Top 5
+              </h3>
+              <div id="q-ranking"></div>
+            </div>
+            
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== RESULT ========== -->
+      <section id="sec-result" class="screen-section">
+        <div class="game-grid">
+          
+          <!-- Main content -->
+          <div>
+            <div class="card" style="padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <span id="r-type" class="badge badge-primary"></span>
+                <span id="r-counter" class="badge badge-neutral"></span>
+              </div>
+              
+              <div id="r-image-wrap" style="display: none; margin-bottom: 1rem;">
+                <img id="r-image" src="" alt="" style="width: 100%; max-height: 180px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary);">
+              </div>
+              
+              <p id="r-prompt" class="text-body mb-3" style="white-space: pre-line; color: var(--text-secondary);"></p>
+              
+              <!-- Stats -->
+              <div id="r-stats" class="mb-4"></div>
+              
+              <!-- Correct answer -->
+              <div class="answer-box success">
+                <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                  <span style="color: var(--success);"><%- include('icons/check-circle', { size: 24 }) %></span>
+                  <div>
+                    <p class="text-small" style="color: var(--success); margin-bottom: 0.25rem;">Resposta Correta</p>
+                    <p id="r-answer" class="text-title" style="font-weight: 600;"></p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Explanation -->
+              <div class="answer-box info">
+                <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                  <span style="color: var(--accent-primary);"><%- include('icons/light-bulb', { size: 24 }) %></span>
+                  <div>
+                    <p class="text-small" style="color: var(--accent-primary); margin-bottom: 0.25rem;">Explicação</p>
+                    <p id="r-explanation" class="text-body" style="color: var(--text-secondary);"></p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- Sidebar: Updated Ranking -->
-        <div style="flex: 1; display: flex; flex-direction: column; min-width: 300px;">
-          <div class="card animate-fadeInUp" style="padding: 1.5rem; flex: 1; animation-delay: 200ms;">
-            <h3 class="screen-text-medium mb-4" style="display: flex; align-items: center; gap: 0.75rem;">
-              <%- include('icons/trophy', { size: 24 }) %> Ranking Atualizado
-            </h3>
-            <div id="result-ranking" class="space-y-3"></div>
+          
+          <!-- Sidebar -->
+          <div>
+            <div class="card" style="padding: 1.25rem;">
+              <h3 class="text-title mb-3" style="display: flex; align-items: center; gap: 0.5rem;">
+                <%- include('icons/trophy', { size: 20 }) %> Ranking
+              </h3>
+              <div id="r-ranking"></div>
+            </div>
           </div>
+          
         </div>
-      </div>
+      </section>
 
-      <!-- ==================== GAME OVER STATE ==================== -->
-      <div id="gameover-section" class="hidden" style="flex: 1; display: flex; flex-direction: column;">
-        <div class="card animate-scaleIn text-center" style="flex: 1; padding: 3rem; display: flex; flex-direction: column; justify-content: center;">
-          
-          <div class="animate-float" style="margin-bottom: 2rem; color: var(--warning);">
-            <%- include('icons/trophy', { size: 160 }) %>
-          </div>
-          
-          <h2 class="screen-text-huge mb-6" style="color: var(--text-primary);">Fim do Jogo!</h2>
-          
-          <!-- Final Ranking -->
-          <div style="max-width: 700px; margin: 0 auto; width: 100%;">
-            <h3 class="screen-text-large mb-4" style="color: var(--accent-light);">🎉 Ranking Final</h3>
-            <div id="final-ranking" class="space-y-3"></div>
-          </div>
-          
-          <div style="margin-top: 3rem;">
-            <p class="screen-text-medium" style="color: var(--text-muted);">Obrigado por participar!</p>
+      <!-- ========== GAME OVER ========== -->
+      <section id="sec-gameover" class="screen-section">
+        <div style="text-align: center; width: 100%; max-width: 600px;">
+          <div class="card" style="padding: 2.5rem;">
+            
+            <div style="color: var(--golden); margin-bottom: 1.5rem;">
+              <%- include('icons/trophy', { size: 72 }) %>
+            </div>
+            
+            <h2 class="text-display mb-4">Fim do Jogo!</h2>
+            
+            <h3 class="text-headline mb-4" style="color: var(--accent-primary);">🎉 Ranking Final</h3>
+            
+            <div id="final-ranking"></div>
+            
+            <p class="text-body text-muted" style="margin-top: 2rem;">Obrigado por participar!</p>
+            
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+    </main>
   </div>
 
-  <!-- Confetti Container -->
+  <!-- Confetti -->
   <div id="confetti-container" class="confetti-container"></div>
 
   <script>
+    // ==================== INITIALIZATION ====================
     const roomCode = '<%= roomCode %>';
+    const joinUrl = window.location.origin + '/join';
     
     // Set join URL
-    document.getElementById('join-url').textContent = window.location.origin + '/join';
+    document.getElementById('join-url').textContent = joinUrl;
+    
+    // Generate QR Code
+    const qrContainer = document.getElementById('qr-container');
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(qrContainer, {
+        text: joinUrl,
+        width: 180,
+        height: 180,
+        colorDark: '#0B1E3F',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
 
-    let socket = null;
+    // ==================== SECTIONS ====================
+    const sections = {
+      lobby: document.getElementById('sec-lobby'),
+      question: document.getElementById('sec-question'),
+      result: document.getElementById('sec-result'),
+      gameover: document.getElementById('sec-gameover')
+    };
 
-    // DOM Elements
-    const lobbySection = document.getElementById('lobby-section');
-    const questionSection = document.getElementById('question-section');
-    const resultSection = document.getElementById('result-section');
-    const gameoverSection = document.getElementById('gameover-section');
+    function showSection(name) {
+      console.log('📺 Showing section:', name);
+      Object.values(sections).forEach(s => s.classList.remove('active'));
+      if (sections[name]) {
+        sections[name].classList.add('active');
+      }
+    }
 
-    // Connect as host to receive updates
-    socket = io();
+    // ==================== SOCKET CONNECTION ====================
+    const socket = io();
     socket.emit('host:join', { roomCode });
 
-    socket.on('room:state', updateState);
-    socket.on('player:joined', (player) => {
-      console.log('New player:', player.nickname);
-    });
-    socket.on('player:answered', (data) => {
-      document.getElementById('answered-count').textContent = data.answeredCount;
-      document.getElementById('total-players').textContent = data.totalPlayers;
-    });
-    socket.on('game:ended', showGameOver);
-    socket.on('error', (data) => console.error('Error:', data.message));
+    socket.on('room:state', handleState);
+    socket.on('player:joined', (p) => console.log('👤 Player joined:', p.nickname));
+    socket.on('player:answered', updateAnswerCount);
+    socket.on('game:ended', handleGameOver);
+    socket.on('error', (e) => console.error('❌ Socket error:', e.message));
 
-    function updateState(state) {
-      console.log('State:', state);
+    // ==================== STATE HANDLER ====================
+    function handleState(state) {
+      console.log('📡 State received:', state.status, state);
       
-      // Hide all sections
-      lobbySection.classList.add('hidden');
-      questionSection.classList.add('hidden');
-      resultSection.classList.add('hidden');
-      gameoverSection.classList.add('hidden');
+      // Update rankings everywhere
+      renderRanking(state.ranking, 'q-ranking');
+      renderRanking(state.ranking, 'r-ranking');
 
-      // Update rankings
-      updateRanking(state.ranking, 'ranking-list');
-      updateRanking(state.ranking, 'result-ranking');
-
-      if (state.status === 'lobby') {
-        showLobby(state);
-      } 
-      else if (state.status === 'asking' && state.currentQuestion) {
-        showQuestion(state);
-      } 
-      else if (state.status === 'revealed' && state.revealedQuestion) {
-        showResult(state);
+      switch (state.status) {
+        case 'lobby':
+          showSection('lobby');
+          renderLobby(state);
+          break;
+          
+        case 'asking':
+          if (state.currentQuestion) {
+            showSection('question');
+            renderQuestion(state);
+          }
+          break;
+          
+        case 'revealed':
+          if (state.revealedQuestion) {
+            showSection('result');
+            renderResult(state);
+          }
+          break;
       }
     }
 
-    function showLobby(state) {
-      lobbySection.classList.remove('hidden');
-      lobbySection.style.display = 'flex';
-      document.getElementById('lobby-player-count').textContent = state.players.length;
+    // ==================== RENDER FUNCTIONS ====================
+    function renderLobby(state) {
+      document.getElementById('player-count').textContent = state.players.length;
       
-      const playersHtml = state.players.map(p => `
-        <div class="player-avatar" style="width: 3.5rem; height: 3.5rem; font-size: 1.25rem;">
-          ${p.nickname.charAt(0).toUpperCase()}
-        </div>
-      `).join('');
-      document.getElementById('lobby-players').innerHTML = playersHtml;
+      const html = state.players.map(p => 
+        `<div class="player-bubble">${p.nickname.charAt(0).toUpperCase()}</div>`
+      ).join('');
+      document.getElementById('player-list').innerHTML = html;
     }
 
-    function showQuestion(state) {
-      questionSection.classList.remove('hidden');
-      questionSection.style.display = 'flex';
+    function renderQuestion(state) {
       const q = state.currentQuestion;
       
-      const typeLabels = {
-        'IMAGE_CLASSIFY': '🖼️ Classificar Imagem',
-        'TEXT_CLASSIFY': '📝 Classificar Texto',
-        'HALLUCINATION_DETECT': '🔍 Detectar Alucinação',
-        'LGPD_TRAFFIC_LIGHT': '🚦 LGPD na Escola'
+      const types = {
+        'IMAGE_CLASSIFY': '🖼️ Imagem',
+        'TEXT_CLASSIFY': '📝 Texto',
+        'HALLUCINATION_DETECT': '🔍 Alucinação',
+        'LGPD_TRAFFIC_LIGHT': '🚦 LGPD'
       };
       
-      document.getElementById('question-type').textContent = typeLabels[q.type] || q.type;
-      document.getElementById('question-counter').textContent = `Pergunta ${q.index + 1} de ${q.total}`;
-      document.getElementById('question-prompt').textContent = q.prompt;
+      document.getElementById('q-type').textContent = types[q.type] || q.type;
+      document.getElementById('q-counter').textContent = `${q.index + 1} de ${q.total}`;
+      document.getElementById('q-prompt').textContent = q.prompt;
       
       // Image
-      const imgSection = document.getElementById('question-image');
+      const imgWrap = document.getElementById('q-image-wrap');
       if (q.imageUrl) {
-        imgSection.classList.remove('hidden');
-        document.getElementById('question-img').src = q.imageUrl;
+        imgWrap.style.display = 'block';
+        document.getElementById('q-image').src = q.imageUrl;
       } else {
-        imgSection.classList.add('hidden');
+        imgWrap.style.display = 'none';
       }
       
-      // Options (display only)
+      // Options
       const optionsHtml = q.options.map((opt, i) => `
-        <div class="btn-option screen-option" style="cursor: default;">
-          <span class="option-letter">${String.fromCharCode(65 + i)}</span>
-          <span style="flex: 1;">${opt}</span>
+        <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; background: var(--bg-secondary); border-radius: var(--radius-md); margin-bottom: 0.5rem;">
+          <span style="width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; background: var(--accent-subtle); border-radius: 50%; font-weight: 600; color: var(--accent-primary);">${String.fromCharCode(65 + i)}</span>
+          <span>${opt}</span>
         </div>
       `).join('');
-      document.getElementById('options-container').innerHTML = optionsHtml;
+      document.getElementById('q-options').innerHTML = optionsHtml;
       
-      // Update counters
-      document.getElementById('answered-count').textContent = state.answeredCount;
-      document.getElementById('total-players').textContent = state.totalPlayers;
+      // Counters
+      document.getElementById('answered').textContent = state.answeredCount;
+      document.getElementById('total').textContent = state.totalPlayers;
     }
 
-    function showResult(state) {
-      resultSection.classList.remove('hidden');
-      resultSection.style.display = 'flex';
+    function renderResult(state) {
       const q = state.revealedQuestion;
       
-      const typeLabels = {
-        'IMAGE_CLASSIFY': '🖼️ Classificar Imagem',
-        'TEXT_CLASSIFY': '📝 Classificar Texto',
-        'HALLUCINATION_DETECT': '🔍 Detectar Alucinação',
-        'LGPD_TRAFFIC_LIGHT': '🚦 LGPD na Escola'
+      const types = {
+        'IMAGE_CLASSIFY': '🖼️ Imagem',
+        'TEXT_CLASSIFY': '📝 Texto',
+        'HALLUCINATION_DETECT': '🔍 Alucinação',
+        'LGPD_TRAFFIC_LIGHT': '🚦 LGPD'
       };
       
-      document.getElementById('result-type').textContent = typeLabels[q.type] || q.type;
-      document.getElementById('result-counter').textContent = `Pergunta ${q.index + 1} de ${q.total}`;
-      document.getElementById('result-prompt').textContent = q.prompt;
+      document.getElementById('r-type').textContent = types[q.type] || q.type;
+      document.getElementById('r-counter').textContent = `${q.index + 1} de ${q.total}`;
+      document.getElementById('r-prompt').textContent = q.prompt;
       
       // Image
-      const imgSection = document.getElementById('result-image');
+      const imgWrap = document.getElementById('r-image-wrap');
       if (q.imageUrl) {
-        imgSection.classList.remove('hidden');
-        document.getElementById('result-img').src = q.imageUrl;
+        imgWrap.style.display = 'block';
+        document.getElementById('r-image').src = q.imageUrl;
       } else {
-        imgSection.classList.add('hidden');
+        imgWrap.style.display = 'none';
       }
       
-      // Stats bars
+      // Stats
       const statsHtml = q.stats.map((s, i) => {
         const isCorrect = i === q.correctOption;
         return `
-          <div class="stat-bar-container" style="padding: 1rem 1.25rem;">
-            <span class="stat-bar-label" style="width: 2.5rem; height: 2.5rem; font-size: 1.25rem; ${isCorrect ? 'background: var(--success);' : ''}">
-              ${String.fromCharCode(65 + i)}
-            </span>
-            <div class="stat-bar-track screen-stat-bar">
+          <div class="stat-row">
+            <span class="stat-letter ${isCorrect ? 'correct' : ''}">${String.fromCharCode(65 + i)}</span>
+            <div class="stat-bar-wrapper">
               <div class="stat-bar-fill ${isCorrect ? 'correct' : ''}" style="width: ${s.percentage}%;"></div>
             </div>
-            <span class="stat-bar-percentage" style="font-size: 1.25rem; width: 4.5rem;">${s.percentage}%</span>
-            <span class="stat-bar-count" style="font-size: 1rem;">(${s.count})</span>
+            <span class="stat-percentage">${s.percentage}%</span>
+            <span class="text-small text-muted">(${s.count})</span>
           </div>
         `;
       }).join('');
-      document.getElementById('stats-container').innerHTML = statsHtml;
+      document.getElementById('r-stats').innerHTML = statsHtml;
       
       // Correct answer
-      document.getElementById('correct-answer').textContent = 
+      document.getElementById('r-answer').textContent = 
         `${String.fromCharCode(65 + q.correctOption)}) ${q.options[q.correctOption]}`;
       
       // Explanation
-      document.getElementById('explanation').textContent = q.explanation;
+      document.getElementById('r-explanation').textContent = q.explanation;
     }
 
-    function showGameOver(data) {
-      lobbySection.classList.add('hidden');
-      questionSection.classList.add('hidden');
-      resultSection.classList.add('hidden');
-      gameoverSection.classList.remove('hidden');
-      gameoverSection.style.display = 'flex';
-      
-      const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
-      
-      const rankingHtml = data.ranking.slice(0, 10).map((p, i) => {
-        let rankClass = '';
-        if (i === 0) rankClass = 'gold';
-        else if (i === 1) rankClass = 'silver';
-        else if (i === 2) rankClass = 'bronze';
-        
-        return `
-          <div class="ranking-item ${rankClass} screen-ranking-item">
-            <span class="screen-ranking-position">${medals[i] || ''}</span>
-            <span class="ranking-name" style="font-size: 1.25rem;">${p.nickname}</span>
-            <span class="ranking-score" style="font-size: 1.5rem;">${p.score} pts</span>
-          </div>
-        `;
-      }).join('');
-      
-      document.getElementById('final-ranking').innerHTML = rankingHtml;
-      
-      // Confetti celebration
-      createConfetti(50);
-    }
-
-    function updateRanking(ranking, elementId) {
-      const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+    function renderRanking(ranking, elementId) {
       const el = document.getElementById(elementId);
+      if (!el) return;
       
       if (!ranking || ranking.length === 0) {
-        el.innerHTML = `<p class="text-caption text-center" style="padding: 1.5rem; color: var(--text-muted);">Aguardando...</p>`;
+        el.innerHTML = '<p class="text-small text-center text-muted" style="padding: 1rem;">Aguardando...</p>';
         return;
       }
       
+      const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
       const html = ranking.slice(0, 5).map((p, i) => {
-        let rankClass = '';
-        if (i === 0) rankClass = 'gold';
-        else if (i === 1) rankClass = 'silver';
-        else if (i === 2) rankClass = 'bronze';
+        let cls = '';
+        if (i === 0) cls = 'gold';
+        else if (i === 1) cls = 'silver';
+        else if (i === 2) cls = 'bronze';
         
         return `
-          <div class="ranking-item ${rankClass} screen-ranking-item">
-            <span class="screen-ranking-position">${medals[i]}</span>
-            <span class="ranking-name">${p.nickname}</span>
-            <span class="ranking-score">${p.score}</span>
+          <div class="rank-item ${cls}">
+            <span class="rank-medal">${medals[i]}</span>
+            <span class="rank-name">${p.nickname}</span>
+            <span class="rank-score">${p.score}</span>
           </div>
         `;
       }).join('');
+      
       el.innerHTML = html;
     }
 
-    // Confetti effect
-    function createConfetti(count = 30) {
+    function updateAnswerCount(data) {
+      document.getElementById('answered').textContent = data.answeredCount;
+      document.getElementById('total').textContent = data.totalPlayers;
+    }
+
+    function handleGameOver(data) {
+      showSection('gameover');
+      
+      const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+      const html = data.ranking.slice(0, 10).map((p, i) => {
+        let cls = '';
+        if (i === 0) cls = 'gold';
+        else if (i === 1) cls = 'silver';
+        else if (i === 2) cls = 'bronze';
+        
+        return `
+          <div class="rank-item ${cls}">
+            <span class="rank-medal">${medals[i]}</span>
+            <span class="rank-name">${p.nickname}</span>
+            <span class="rank-score">${p.score} pts</span>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('final-ranking').innerHTML = html;
+      
+      // Celebration
+      createConfetti(50);
+    }
+
+    // ==================== CONFETTI ====================
+    function createConfetti(count) {
       const container = document.getElementById('confetti-container');
-      const colors = ['#3B82F6', '#60A5FA', '#22C55E', '#FBBF24', '#F87171', '#A855F7'];
+      const colors = ['#00C9E0', '#F5B800', '#22C55E', '#FF6B35', '#3B82F6', '#A855F7'];
       
       for (let i = 0; i < count; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti-piece';
-        confetti.style.left = Math.random() * 100 + '%';
-        confetti.style.top = '-20px';
-        confetti.style.width = (10 + Math.random() * 10) + 'px';
-        confetti.style.height = (10 + Math.random() * 10) + 'px';
-        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        piece.style.width = (8 + Math.random() * 12) + 'px';
+        piece.style.height = (8 + Math.random() * 12) + 'px';
+        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
         
-        container.appendChild(confetti);
+        container.appendChild(piece);
         
-        confetti.animate([
-          { 
-            opacity: 1, 
-            transform: `translateY(0) rotate(0deg)`,
-          },
-          { 
-            opacity: 0, 
-            transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 1080}deg)`,
-          }
+        piece.animate([
+          { opacity: 1, transform: 'translateY(0) rotate(0deg)' },
+          { opacity: 0, transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 1080}deg)` }
         ], {
           duration: 3000 + Math.random() * 3000,
           easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           delay: i * 30
-        }).onfinish = () => confetti.remove();
+        }).onfinish = () => piece.remove();
       }
     }
   </script>

@@ -1,0 +1,12 @@
+<%
+  // Category badge component - displays category name with optional count
+  const categoryName = typeof catName !== 'undefined' ? catName : '';
+  const categoryCount = typeof catCount !== 'undefined' ? catCount : null;
+  const categoryStyle = typeof catStyle !== 'undefined' ? catStyle : '';
+%>
+<span class="badge badge-neutral" style="font-size: 0.75rem; <%= categoryStyle %>">
+  <%= categoryName %>
+  <% if (categoryCount !== null) { %>
+    (<%= categoryCount %>)
+  <% } %>
+</span>

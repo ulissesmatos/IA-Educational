@@ -1,0 +1,17 @@
+<%
+  // Hero section for dashboard
+  const heroTitle = typeof pageTitle !== 'undefined' ? pageTitle : 'IA na Educação';
+  const heroSubtitle = typeof pageSubtitle !== 'undefined' ? pageSubtitle : 'Ferramentas e recursos para explorar Inteligência Artificial no contexto educacional';
+  const heroIcon = typeof pageIcon !== 'undefined' ? pageIcon : 'cpu-chip';
+%>
+<header class="text-center mb-16 animate-fadeInDown">
+<!--   <div style="display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px; background: var(--accent-primary); border-radius: var(--radius-xl); margin-bottom: 1.5rem; color: white; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);">
+    <%- include('../../icons/' + heroIcon, { size: 40 }) %>
+  </div> -->
+  <h1 class="text-display mb-4" style="background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+    <%= heroTitle %>
+  </h1>
+  <p class="text-body" style="max-width: 600px; margin: 0 auto; color: var(--text-secondary); line-height: 1.7; margin-bottom: 2rem;">
+    <%= heroSubtitle %>
+  </p>
+</header>

@@ -1,0 +1,14 @@
+<%
+  // Badge component with flexible variants and sizes
+  const variant = typeof badgeVariant !== 'undefined' ? badgeVariant : 'neutral';
+  const size = typeof badgeSize !== 'undefined' ? badgeSize : 'md';
+  const icon = typeof badgeIcon !== 'undefined' ? badgeIcon : null;
+  const label = typeof badgeLabel !== 'undefined' ? badgeLabel : '';
+  const className = typeof badgeClass !== 'undefined' ? badgeClass : '';
+%>
+<span class="badge badge-<%= variant %> <%= size === 'sm' ? 'badge-sm' : '' %> <%= className %>" style="<%= typeof badgeStyle !== 'undefined' ? badgeStyle : '' %>">
+  <% if (icon) { %>
+    <%- include(`../../icons/${icon}`, { size: size === 'sm' ? 12 : 14 }) %>
+  <% } %>
+  <%= label %>
+</span>

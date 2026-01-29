@@ -1,0 +1,32 @@
+<%
+  // Callout/Alert component for notifications and messages
+  const type = typeof calloutType !== 'undefined' ? calloutType : 'info';
+  const title = typeof calloutTitle !== 'undefined' ? calloutTitle : null;
+  const message = typeof calloutMessage !== 'undefined' ? calloutMessage : '';
+  const icon = typeof calloutIcon !== 'undefined' ? calloutIcon : null;
+  
+  // Auto-select icon based on type if not provided
+  let autoIcon = icon;
+  if (!autoIcon) {
+    switch(type) {
+      case 'success': autoIcon = 'check-circle'; break;
+      case 'warning': autoIcon = 'exclamation-triangle'; break;
+      case 'error': autoIcon = 'x-circle'; break;
+      default: autoIcon = 'light-bulb';
+    }
+  }
+  
+  // Map type to CSS class
+  const typeClass = type === 'error' ? 'danger' : type;
+%>
+<div class="callout callout-<%= typeClass %>" style="display: flex; gap: 0.75rem; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+  <div style="flex-shrink: 0;">
+    <%- include(`../../icons/${autoIcon}`, { size: 20 }) %>
+  </div>
+  <div style="flex: 1;">
+    <% if (title) { %>
+      <p style="font-weight: 600; margin-bottom: 0.25rem;"><%= title %></p>
+    <% } %>
+    <p class="text-body" style="margin: 0;"><%= message %></p>
+  </div>
+</div>

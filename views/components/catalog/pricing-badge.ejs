@@ -1,0 +1,22 @@
+<%
+  // Pricing badge component - shows FREE, FREEMIUM, or PAID with appropriate styling
+  const pricingType = typeof toolPricingType !== 'undefined' ? toolPricingType : 'FREEMIUM';
+  const iconSize = typeof pricingIconSize !== 'undefined' ? pricingIconSize : 14;
+  const showLabel = typeof pricingShowLabel !== 'undefined' ? pricingShowLabel : true;
+%>
+<% if (pricingType === 'FREE') { %>
+  <span class="badge badge-success" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+    <%- include('../../icons/check-circle', { size: iconSize }) %>
+    <% if (showLabel) { %>Grátis<% } %>
+  </span>
+<% } else if (pricingType === 'FREEMIUM') { %>
+  <span class="badge badge-warning" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+    <%- include('../../icons/minus-circle', { size: iconSize }) %>
+    <% if (showLabel) { %>Freemium<% } %>
+  </span>
+<% } else { %>
+  <span class="badge badge-error" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+    <%- include('../../icons/currency-dollar', { size: iconSize }) %>
+    <% if (showLabel) { %>Pago<% } %>
+  </span>
+<% } %>

@@ -1,0 +1,46 @@
+<%
+  // Featured tools section component
+  const tools = typeof featuredTools !== 'undefined' ? featuredTools : [];
+%>
+<% if (tools && tools.length > 0) { %>
+<section class="animate-fadeInUp" style="animation-delay: 200ms; padding-top: 1rem; padding-bottom: 1rem; border-top: 1px solid var(--border-light);">
+  <div class="flex items-center justify-between mb-8">
+    <h2 class="text-headline" style="display: flex; align-items: center; gap: 10px;">
+      <div style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--warning-bg); border-radius: var(--radius-md); color: var(--warning);">
+        <%- include('../../icons/star', { size: 18 }) %>
+      </div>
+      <span>IAs em Destaque</span>
+    </h2>
+    <a href="/ias" class="btn btn-ghost btn-sm" style="display: inline-flex; align-items: center; gap: 4px;">
+      Ver todas <%- include('../../icons/arrow-right', { size: 14 }) %>
+    </a>
+  </div>
+  
+  <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;">
+    <% tools.slice(0, 6).forEach(function(tool) { %>
+      <%- include('../catalog/tool-card', { cardTool: tool, cardFeatured: true }) %>
+    <% }); %>
+  </div>
+</section>
+
+<script>
+// Stagger animation for featured tools
+document.addEventListener('DOMContentLoaded', function() {
+  const featuredTools = document.querySelectorAll('[data-featured-tool]');
+  featuredTools.forEach((tool, index) => {
+    setTimeout(() => {
+      tool.style.opacity = '1';
+      tool.style.transform = 'translateY(0)';
+    }, 200 + (index * 80));
+  });
+});
+</script>
+
+<style>
+[data-featured-tool] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+</style>
+<% } %>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<%- include('../partials/head', { title: title || 'IA ou Não?' }) %>
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : 'gradient-bg min-h-screen' %>">
+  
+  <%- include('../components/ui/background-decoration') %>
+  
+  <main style="position: relative; z-index: 1; padding: 1.5rem;">
+    <%- body %>
+  </main>
+  
+  <% if (typeof includeSocketIO !== 'undefined' && includeSocketIO === true) { %>
+    <script src="/socket.io/socket.io.js"></script>
+  <% } %>
+</body>
+</html>
