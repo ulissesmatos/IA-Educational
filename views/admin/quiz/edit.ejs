@@ -41,28 +41,38 @@
                         <span style="color: var(--admin-danger);">*</span>
                     </label>
                     <textarea 
-                        name="text" 
+                        name="prompt" 
                         class="admin-form-input" 
                         rows="3" 
                         required
                         placeholder="Ex: Esta imagem foi gerada por IA?"
-                    ><%= question ? question.text : (formData ? formData.text : '') %></textarea>
+                    ><%= question ? question.prompt : (formData ? formData.prompt : '') %></textarea>
                     <p class="admin-form-help">Escreva a pergunta que será exibida aos jogadores</p>
                 </div>
                 
-                <!-- Categoria -->
+                <!-- Tipo de Questão -->
                 <div class="admin-form-group">
                     <label class="admin-form-label">
-                        Categoria
+                        Tipo de Questão
                     </label>
-                    <input 
-                        type="text" 
-                        name="category" 
-                        class="admin-form-input"
-                        value="<%= question ? question.category || '' : (formData ? formData.category || '' : '') %>"
-                        placeholder="Ex: Imagens, Textos, Música"
-                    >
-                    <p class="admin-form-help">Categoria da pergunta (opcional)</p>
+                    <select name="type" class="admin-form-input" id="question-type">
+                        <option value="IMAGE_CLASSIFY" <%= (question && question.type === 'IMAGE_CLASSIFY') || (formData && formData.type === 'IMAGE_CLASSIFY') || (!question && !formData) ? 'selected' : '' %>>
+                            Classificar Imagem (IA ou Humano)
+                        </option>
+                        <option value="IMAGE_COMPARE" <%= (question && question.type === 'IMAGE_COMPARE') || (formData && formData.type === 'IMAGE_COMPARE') ? 'selected' : '' %>>
+                            Comparar 2 Imagens (Qual é IA?)
+                        </option>
+                        <option value="TEXT_CLASSIFY" <%= (question && question.type === 'TEXT_CLASSIFY') || (formData && formData.type === 'TEXT_CLASSIFY') ? 'selected' : '' %>>
+                            Classificar Texto (IA ou Humano)
+                        </option>
+                        <option value="HALLUCINATION_DETECT" <%= (question && question.type === 'HALLUCINATION_DETECT') || (formData && formData.type === 'HALLUCINATION_DETECT') ? 'selected' : '' %>>
+                            Detectar Alucinação
+                        </option>
+                        <option value="LGPD_TRAFFIC_LIGHT" <%= (question && question.type === 'LGPD_TRAFFIC_LIGHT') || (formData && formData.type === 'LGPD_TRAFFIC_LIGHT') ? 'selected' : '' %>>
+                            Semáforo LGPD
+                        </option>
+                    </select>
+                    <p class="admin-form-help">Tipo de pergunta do quiz. "Comparar 2 Imagens" exibe duas imagens lado a lado.</p>
                 </div>
                 
                 <!-- Resposta Correta -->
@@ -75,22 +85,22 @@
                         <label class="admin-radio-label">
                             <input 
                                 type="radio" 
-                                name="correctAnswer" 
-                                value="true"
-                                <%= (question && question.correctAnswer) || (formData && formData.correctAnswer === 'true') ? 'checked' : '' %>
+                                name="correctOption" 
+                                value="0"
+                                <%= (question && question.correctOption === 0) || (formData && formData.correctOption === '0') ? 'checked' : '' %>
                                 required
                             >
-                            <span>IA (Verdadeiro)</span>
+                            <span>IA (Primeira opção)</span>
                         </label>
                         <label class="admin-radio-label">
                             <input 
                                 type="radio" 
-                                name="correctAnswer" 
-                                value="false"
-                                <%= (question && !question.correctAnswer) || (formData && formData.correctAnswer === 'false') ? 'checked' : '' %>
+                                name="correctOption" 
+                                value="1"
+                                <%= (question && question.correctOption === 1) || (formData && formData.correctOption === '1') || (!question && !formData) ? 'checked' : '' %>
                                 required
                             >
-                            <span>Não IA (Falso)</span>
+                            <span>Não IA (Segunda opção)</span>
                         </label>
                     </div>
                     <p class="admin-form-help">Selecione se o conteúdo foi criado por IA ou não</p>
@@ -100,48 +110,47 @@
                 <div class="admin-form-group">
                     <label class="admin-form-label">
                         Explicação
+                        <span style="color: var(--admin-danger);">*</span>
                     </label>
                     <textarea 
                         name="explanation" 
                         class="admin-form-input" 
                         rows="4"
+                        required
                         placeholder="Ex: Esta imagem apresenta características típicas de IA como..."
                     ><%= question ? question.explanation || '' : (formData ? formData.explanation || '' : '') %></textarea>
-                    <p class="admin-form-help">Explicação que será mostrada após a resposta (opcional)</p>
+                    <p class="admin-form-help">Explicação que será mostrada após a resposta</p>
                 </div>
                 
                 <!-- URL da Imagem -->
                 <div class="admin-form-group">
                     <label class="admin-form-label">
-                        URL da Imagem
+                        URL da Imagem <span id="image1-label">(Imagem principal)</span>
                     </label>
                     <input 
-                        type="url" 
+                        type="text" 
                         name="imageUrl" 
                         class="admin-form-input"
                         value="<%= question ? question.imageUrl || '' : (formData ? formData.imageUrl || '' : '') %>"
-                        placeholder="https://exemplo.com/imagem.jpg"
+                        placeholder="/images/minha-imagem.jpg ou https://exemplo.com/imagem.jpg"
                     >
-                    <p class="admin-form-help">URL da imagem relacionada à pergunta (opcional)</p>
+                    <p class="admin-form-help">URL da imagem relacionada à pergunta (opcional). Pode ser caminho local ou URL externa.</p>
                 </div>
                 
-                <!-- Dificuldade -->
-                <div class="admin-form-group">
+                <!-- URL da Segunda Imagem (para IMAGE_COMPARE) -->
+                <div class="admin-form-group" id="image2-group" style="display: none;">
                     <label class="admin-form-label">
-                        Dificuldade
+                        URL da Segunda Imagem
+                        <span style="color: var(--admin-danger);">*</span>
                     </label>
-                    <select name="difficulty" class="admin-form-input">
-                        <option value="easy" <%= (question && question.difficulty === 'easy') || (formData && formData.difficulty === 'easy') ? 'selected' : '' %>>
-                            Fácil
-                        </option>
-                        <option value="medium" <%= (question && question.difficulty === 'medium') || (formData && formData.difficulty === 'medium') || (!question && !formData) ? 'selected' : '' %>>
-                            Média
-                        </option>
-                        <option value="hard" <%= (question && question.difficulty === 'hard') || (formData && formData.difficulty === 'hard') ? 'selected' : '' %>>
-                            Difícil
-                        </option>
-                    </select>
-                    <p class="admin-form-help">Nível de dificuldade da pergunta</p>
+                    <input 
+                        type="text" 
+                        name="imageUrl2" 
+                        class="admin-form-input"
+                        value="<%= question ? question.imageUrl2 || '' : (formData ? formData.imageUrl2 || '' : '') %>"
+                        placeholder="/images/segunda-imagem.jpg ou https://exemplo.com/imagem2.jpg"
+                    >
+                    <p class="admin-form-help">Segunda imagem para comparação. O jogador escolherá qual das duas é IA.</p>
                 </div>
                 
                 <!-- Status Ativo -->
@@ -174,3 +183,5 @@
 </div>
 
 <%- include('../partials/footer') %>
+
+<script src="/admin/js/quiz-form.js"></script>

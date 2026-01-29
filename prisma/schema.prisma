@@ -21,6 +21,7 @@ enum RoomStatus {
 // Tipos de questões
 enum QuestionType {
   IMAGE_CLASSIFY        // Imagem feita por IA ou humano?
+  IMAGE_COMPARE         // Duas imagens: qual é IA?
   TEXT_CLASSIFY         // Texto de IA ou humano?
   HALLUCINATION_DETECT  // Tem erro/alucinação?
   LGPD_TRAFFIC_LIGHT    // Pode/Depende/Não pode
@@ -63,6 +64,7 @@ model Question {
   type          QuestionType
   prompt        String       @db.Text
   imageUrl      String?      @map("image_url") @db.VarChar(500)
+  imageUrl2     String?      @map("image_url_2") @db.VarChar(500) // Segunda imagem para IMAGE_COMPARE
   optionsJson   Json         @map("options_json") // Array de alternativas
   correctOption Int          @map("correct_option") // Índice da resposta correta (0-based)
   explanation   String       @db.Text

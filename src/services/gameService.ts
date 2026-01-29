@@ -341,6 +341,7 @@ export class GameService {
         type: q.type as QuestionInfo['type'],
         prompt: q.prompt,
         imageUrl: q.imageUrl,
+        imageUrl2: (q as any).imageUrl2 || null, // Segunda imagem para IMAGE_COMPARE
         options,
         index: room.currentQuestionIndex,
         total: room.roomQuestions.length,

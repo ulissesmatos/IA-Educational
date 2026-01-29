@@ -81,9 +81,10 @@ export class QuizController {
    */
   static validators = [
     body('prompt').trim().notEmpty().withMessage('Texto da pergunta é obrigatório'),
-    body('correctOption').isInt().withMessage('Opção correta inválida'),
+    body('correctOption').isInt({ min: 0, max: 1 }).withMessage('Opção correta inválida'),
     body('explanation').trim().notEmpty().withMessage('Explicação é obrigatória'),
-    body('imageUrl').optional().isURL().withMessage('URL da imagem inválida'),
+    body('imageUrl').optional({ checkFalsy: true }),
+    body('imageUrl2').optional({ checkFalsy: true }),
     body('type').optional().isIn(Object.values(QuestionType)),
     body('isActive').optional()
   ];
@@ -106,16 +107,23 @@ export class QuizController {
     }
 
     try {
-      const { prompt, type, correctOption, explanation, imageUrl, isActive, options } = req.body;
+      const { prompt, type, correctOption, explanation, imageUrl, imageUrl2, isActive, options } = req.body;
+
+      // Definir opções baseado no tipo
+      let questionOptions = options ? JSON.parse(options) : ['IA', 'Não IA'];
+      if (type === 'IMAGE_COMPARE') {
+        questionOptions = ['Imagem A', 'Imagem B'];
+      }
 
       await prisma.question.create({
         data: {
           prompt,
           type: (type as QuestionType) || 'IMAGE_CLASSIFY',
           correctOption: parseInt(correctOption),
-          optionsJson: options ? JSON.parse(options) : ['IA', 'Não IA'],
+          optionsJson: questionOptions,
           explanation,
           imageUrl: imageUrl || null,
+          imageUrl2: imageUrl2 || null,
           isActive: isActive === 'true'
         }
       });
@@ -154,7 +162,13 @@ export class QuizController {
     }
 
     try {
-      const { prompt, type, correctOption, explanation, imageUrl, isActive, options } = req.body;
+      const { prompt, type, correctOption, explanation, imageUrl, imageUrl2, isActive, options } = req.body;
+
+      // Definir opções baseado no tipo
+      let questionOptions = options ? JSON.parse(options) : ['IA', 'Não IA'];
+      if (type === 'IMAGE_COMPARE') {
+        questionOptions = ['Imagem A', 'Imagem B'];
+      }
 
       await prisma.question.update({
         where: { id: req.params.id },
@@ -162,9 +176,10 @@ export class QuizController {
           prompt,
           type: (type as QuestionType) || 'IMAGE_CLASSIFY',
           correctOption: parseInt(correctOption),
-          optionsJson: options ? JSON.parse(options) : ['IA', 'Não IA'],
+          optionsJson: questionOptions,
           explanation,
           imageUrl: imageUrl || null,
+          imageUrl2: imageUrl2 || null,
           isActive: isActive === 'true'
         }
       });

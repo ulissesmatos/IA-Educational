@@ -94,6 +94,22 @@
                style="width: 100%; max-height: 280px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary);">
         </div>
         
+        <!-- Compare Images (for IMAGE_COMPARE type) -->
+        <div id="question-images-compare" class="mb-4 hidden">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div style="text-align: center;">
+              <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">Imagem A</p>
+              <img id="question-img-a" src="" alt="Imagem A" 
+                   style="width: 100%; max-height: 220px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary); border: 2px solid var(--border-color);">
+            </div>
+            <div style="text-align: center;">
+              <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">Imagem B</p>
+              <img id="question-img-b" src="" alt="Imagem B" 
+                   style="width: 100%; max-height: 220px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary); border: 2px solid var(--border-color);">
+            </div>
+          </div>
+        </div>
+        
         <!-- Question Text -->
         <p id="question-prompt" class="text-body" style="white-space: pre-line; line-height: 1.7;"></p>
       </div>
@@ -311,6 +327,7 @@
     function showQuestion(q) {
       const typeLabels = {
         'IMAGE_CLASSIFY': '🖼️ Imagem',
+        'IMAGE_COMPARE': '🖼️🆚🖼️ Compare',
         'TEXT_CLASSIFY': '📝 Texto',
         'HALLUCINATION_DETECT': '🔍 Alucinação',
         'LGPD_TRAFFIC_LIGHT': '🚦 LGPD'
@@ -320,13 +337,24 @@
       document.getElementById('question-counter').textContent = `${q.index + 1} de ${q.total}`;
       document.getElementById('question-prompt').textContent = q.prompt;
       
-      // Image
+      // Image handling
       const imgSection = document.getElementById('question-image');
-      if (q.imageUrl) {
+      const imgCompareSection = document.getElementById('question-images-compare');
+      
+      if (q.type === 'IMAGE_COMPARE' && q.imageUrl && q.imageUrl2) {
+        // Show side-by-side images
+        imgSection.classList.add('hidden');
+        imgCompareSection.classList.remove('hidden');
+        document.getElementById('question-img-a').src = q.imageUrl;
+        document.getElementById('question-img-b').src = q.imageUrl2;
+      } else if (q.imageUrl) {
+        // Show single image
         imgSection.classList.remove('hidden');
+        imgCompareSection.classList.add('hidden');
         document.getElementById('question-img').src = q.imageUrl;
       } else {
         imgSection.classList.add('hidden');
+        imgCompareSection.classList.add('hidden');
       }
       
       // Options with staggered animation

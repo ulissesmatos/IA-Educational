@@ -8,6 +8,7 @@ export type RoomStatus = 'lobby' | 'asking' | 'revealed' | 'ended';
 // Tipos de questões
 export type QuestionType = 
   | 'IMAGE_CLASSIFY' 
+  | 'IMAGE_COMPARE'
   | 'TEXT_CLASSIFY' 
   | 'HALLUCINATION_DETECT' 
   | 'LGPD_TRAFFIC_LIGHT';
@@ -26,6 +27,7 @@ export interface QuestionInfo {
   type: QuestionType;
   prompt: string;
   imageUrl: string | null;
+  imageUrl2: string | null; // Segunda imagem para IMAGE_COMPARE
   options: string[];
   index: number;
   total: number;

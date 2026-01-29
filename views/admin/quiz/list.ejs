@@ -32,19 +32,36 @@
                             <tr>
                                 <td>
                                     <div style="max-width: 500px; white-space: normal;">
-                                        <%= question.text %>
+                                        <%= question.prompt %>
                                     </div>
                                 </td>
                                 <td>
+                                    <% 
+                                    const typeLabels = {
+                                        'IMAGE_CLASSIFY': '🖼️ Imagem',
+                                        'IMAGE_COMPARE': '🖼️🆚🖼️ Compare',
+                                        'TEXT_CLASSIFY': '📝 Texto',
+                                        'HALLUCINATION_DETECT': '🔍 Alucinação',
+                                        'LGPD_TRAFFIC_LIGHT': '🚦 LGPD'
+                                    };
+                                    %>
                                     <span class="admin-badge admin-badge-secondary">
-                                        <%= question.category || 'Geral' %>
+                                        <%= typeLabels[question.type] || question.type || 'Geral' %>
                                     </span>
                                 </td>
                                 <td>
-                                    <% if (question.correctAnswer) { %>
-                                        <span class="admin-badge admin-badge-success">IA</span>
+                                    <% if (question.type === 'IMAGE_COMPARE') { %>
+                                        <% if (question.correctOption === 0) { %>
+                                            <span class="admin-badge admin-badge-success">Img A é IA</span>
+                                        <% } else { %>
+                                            <span class="admin-badge admin-badge-danger">Img B é IA</span>
+                                        <% } %>
                                     <% } else { %>
-                                        <span class="admin-badge admin-badge-danger">Não IA</span>
+                                        <% if (question.correctOption === 0) { %>
+                                            <span class="admin-badge admin-badge-success">IA</span>
+                                        <% } else { %>
+                                            <span class="admin-badge admin-badge-danger">Não IA</span>
+                                        <% } %>
                                     <% } %>
                                 </td>
                                 <td>
@@ -68,9 +85,9 @@
                                             </svg>
                                         </a>
                                         <button 
-                                            class="admin-btn-icon admin-btn-danger" 
+                                            class="admin-btn-icon admin-btn-danger admin-btn-delete" 
                                             title="Excluir"
-                                            onclick="if(confirm('Tem certeza que deseja excluir esta pergunta?')) { document.getElementById('delete-<%= question.id %>').submit(); }"
+                                            data-delete-form="delete-<%= question.id %>"
                                         >
                                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -106,3 +123,5 @@
 </div>
 
 <%- include('../partials/footer') %>
+
+<script src="/admin/js/quiz-list.js"></script>
