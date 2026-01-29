@@ -243,8 +243,8 @@ router.get('/screen/:room_code', async (req: Request, res: Response) => {
  */
 router.get('/health', async (_req: Request, res: Response) => {
   try {
-    // Verificar conexão com banco
-    await gameService.getActiveRooms();
+    // Verificar conexão com banco através de uma query simples
+    await prisma.room.count();
 
     res.status(200).json({
       status: 'healthy',
