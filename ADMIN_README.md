@@ -33,14 +33,28 @@ SESSION_SECRET="sua-string-secreta-aleatoria-aqui"
 
 **IMPORTANTE**: Em produção, use uma string aleatória forte e nunca compartilhe.
 
-### 3. Executar Migração do Banco de Dados
+### 3. Inicializar Banco de Dados
+
+Para desenvolvimento, use o comando completo que faz tudo automaticamente:
 
 ```bash
-npm run db:generate
-npx prisma migrate dev --name add-admin-tables
+npm run db:init
 ```
 
-Isto criará as tabelas `AdminUser` e `Session` no banco de dados.
+Este comando executa:
+- Geração do cliente Prisma
+- Migrações do banco
+- Verificação e correção de tabelas
+- Seed dos dados iniciais
+
+**Ou execute individualmente:**
+```bash
+npm run db:generate    # Gerar cliente Prisma
+npm run db:migrate     # Executar migrações
+npm run db:check       # Verificar/corrigir tabelas
+npm run db:seed        # Popular dados iniciais
+npm run db:status      # Ver estatísticas do banco
+```
 
 ### 4. Criar Primeiro Usuário Admin
 

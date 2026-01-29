@@ -14,6 +14,7 @@ Ferramenta gamificada para oficina "IA na Educação" - um quiz interativo onde 
 - **Sem login** - apenas nickname
 - **Privacidade** - sem e-mail, sem IP registrado
 - **Responsivo** - funciona em celular e desktop
+- **Customizável** - nome do site configurável via .env
 
 ## 🚀 Início Rápido
 
@@ -144,15 +145,36 @@ npm install
 cp .env.example .env
 # Edite .env com sua DATABASE_URL
 
-# Rodar migrations
-npx prisma migrate dev
+# Inicialização completa do banco (migrações + seed + verificação)
+npm run db:init
 
-# Seed
-npx prisma db seed
+# Ou executar individualmente:
+npm run db:generate    # Gerar cliente Prisma
+npm run db:migrate     # Executar migrações
+npm run db:check       # Verificar/corrigir tabelas
+npm run db:seed        # Popular dados iniciais
+npm run db:status      # Ver estatísticas do banco
+
+# Configurar admin (opcional)
+npm run admin:setup
 
 # Rodar em dev
 npm run dev
 ```
+
+## 🎨 Customização
+
+Para personalizar o nome do site, edite o arquivo `.env`:
+
+```bash
+# Nome do Site (header, footer, admin)
+SITE_NAME=Meu Site Educacional
+
+# Nome do Jogo (dentro das telas do jogo)
+GAME_NAME=IA ou Não?
+```
+
+Para mais detalhes, veja [CUSTOMIZACAO.md](CUSTOMIZACAO.md).
 
 ## 📊 API REST
 

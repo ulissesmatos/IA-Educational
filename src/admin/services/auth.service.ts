@@ -76,14 +76,21 @@ export class AuthService {
   }
 
   /**
-   * Cria novo usuário admin
+   * Cria ou atualiza o usuário admin
    * ATENÇÃO: Use apenas via script de setup, não expor via API
    */
   static async createAdminUser(email: string, password: string, name: string) {
     const passwordHash = await this.hashPassword(password);
     
-    return prisma.adminUser.create({
-      data: {
+    return prisma.adminUser.upsert({
+      where: {
+        email: email.toLowerCase().trim()
+      },
+      update: {
+        passwordHash,
+        name: name.trim()
+      },
+      create: {
         email: email.toLowerCase().trim(),
         passwordHash,
         name: name.trim()

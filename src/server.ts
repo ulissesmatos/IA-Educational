@@ -40,6 +40,13 @@ const io = new Server(httpServer, {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Variáveis globais para views
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.locals.siteName = process.env.SITE_NAME || 'IA ou Não?';
+  res.locals.gameName = process.env.GAME_NAME || 'IA ou Não?';
+  next();
+});
+
 // Arquivos estáticos
 app.use(express.static(path.join(__dirname, '../public')));
 
@@ -62,6 +69,8 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     statusCode: 500,
     title: 'Erro interno',
     message: NODE_ENV === 'development' ? err.message : 'Ocorreu um erro interno no servidor.',
+    siteName: process.env.SITE_NAME || 'IA ou Não?',
+    gameName: process.env.GAME_NAME || 'IA ou Não?',
   });
 });
 
@@ -71,6 +80,8 @@ app.use((_req: Request, res: Response) => {
     statusCode: 404,
     title: 'Página não encontrada',
     message: 'A página que você está procurando não existe ou foi movida.',
+    siteName: process.env.SITE_NAME || 'IA ou Não?',
+    gameName: process.env.GAME_NAME || 'IA ou Não?',
   });
 });
 

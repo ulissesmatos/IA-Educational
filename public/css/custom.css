@@ -713,10 +713,6 @@ body {
 .animate-scaleIn {
   animation: scaleIn 0.3s ease-out forwards;
 }
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-full);
-  backdrop-filter: blur(10px);
-}
 
 .score-chip-value {
   font-size: 1.25rem;

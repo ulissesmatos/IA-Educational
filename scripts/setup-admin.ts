@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Script para criar o primeiro usuário admin
- * Execute: npm run setup-admin
+ * Execute: npm run setup-admin [nome] [email] [senha]
  */
 
 import readline from 'readline';
@@ -19,11 +19,20 @@ function question(query) {
 async function main() {
   console.log('\n🔐 Setup do Primeiro Usuário Admin\n');
 
-  try {
-    const name = await question('Nome: ');
-    const email = await question('Email: ');
-    const password = await question('Senha (mín. 6 caracteres): ');
+  let name, email, password;
 
+  // Check for command line arguments
+  if (process.argv.length >= 5) {
+    name = process.argv[2];
+    email = process.argv[3];
+    password = process.argv[4];
+  } else {
+    name = await question('Nome: ');
+    email = await question('Email: ');
+    password = await question('Senha (mín. 6 caracteres): ');
+  }
+
+  try {
     if (!name || !email || !password) {
       console.error('\n❌ Todos os campos são obrigatórios!');
       rl.close();
@@ -40,7 +49,7 @@ async function main() {
 
     const user = await AuthService.createAdminUser(email, password, name);
 
-    console.log('\n✅ Usuário admin criado com sucesso!');
+    console.log('\n✅ Usuário admin criado/atualizado com sucesso!');
     console.log(`\n📧 Email: ${user.email}`);
     console.log(`👤 Nome: ${user.name}`);
     console.log(`\n🔗 Acesse: http://localhost:3000/admin/login\n`);
