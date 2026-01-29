@@ -238,4 +238,27 @@ router.get('/screen/:room_code', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /health - Health check endpoint
+ */
+router.get('/health', async (_req: Request, res: Response) => {
+  try {
+    // Verificar conexão com banco
+    await gameService.getActiveRooms();
+
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      version: process.env.npm_package_version || '1.0.0'
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 export default router;
