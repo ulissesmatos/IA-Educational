@@ -53,8 +53,8 @@ export function setupAdmin(app: Express): void {
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 24 horas
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // HTTPS em produção
-      sameSite: 'strict'
+      secure: false, // Temporariamente desabilitar HTTPS para teste
+      sameSite: 'lax' // Mudar de 'strict' para 'lax'
     }
   }));
 
