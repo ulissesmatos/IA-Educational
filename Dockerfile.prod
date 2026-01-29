@@ -1,10 +1,10 @@
-FROM node:18-alpine
+FROM node:18-alpine3.18
 
 # Instalar dependências do sistema
 RUN apk add --no-cache \
     curl \
     dumb-init \
-    openssl1.1-compat \
+    openssl \
     && rm -rf /var/cache/apk/*
 
 # Criar usuário não-root
