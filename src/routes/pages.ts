@@ -5,6 +5,7 @@
 import { Router, Request, Response } from 'express';
 import { gameService } from '../services/gameService.js';
 import { aiCatalogService } from '../services/aiCatalogService.js';
+import { prisma } from '../db.js';
 import type { PricingType } from '@prisma/client';
 
 const router = Router();
