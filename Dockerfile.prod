@@ -16,14 +16,17 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Instalar dependências
-RUN npm ci --only=production && npm cache clean --force
+# Instalar TODAS as dependências (incluindo dev) para build
+RUN npm ci && npm cache clean --force
 
 # Copiar código fonte
 COPY . .
 
 # Build da aplicação
 RUN npm run build
+
+# Remover dependências de desenvolvimento após build
+RUN npm prune --production && npm cache clean --force
 
 # Mudar propriedade dos arquivos
 RUN chown -R nextjs:nodejs /app
