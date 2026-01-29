@@ -32,6 +32,9 @@ RUN npm run build
 # Remover dependências de desenvolvimento após build
 RUN npm prune --production && npm cache clean --force
 
+# Instalar tsx para execução de scripts TypeScript
+RUN npm install -g tsx
+
 # Mudar propriedade dos arquivos
 RUN chown -R nextjs:nodejs /app
 USER nextjs
