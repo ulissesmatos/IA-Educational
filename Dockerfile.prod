@@ -4,6 +4,7 @@ FROM node:18-alpine
 RUN apk add --no-cache \
     curl \
     dumb-init \
+    openssl1.1-compat \
     && rm -rf /var/cache/apk/*
 
 # Criar usuário não-root
@@ -18,6 +19,9 @@ COPY prisma ./prisma/
 
 # Instalar TODAS as dependências (incluindo dev) para build
 RUN npm ci && npm cache clean --force
+
+# Gerar cliente Prisma com arquitetura correta
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # Copiar código fonte
 COPY . .
