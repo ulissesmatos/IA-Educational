@@ -16,6 +16,14 @@ if [ ! -f "docker-compose.prod.yml" ]; then
     exit 1
 fi
 
+# Verificar se .env existe
+if [ ! -f ".env" ]; then
+    echo "❌ Arquivo .env não encontrado. Copie .env.prod para .env e configure as variáveis:"
+    echo "   cp .env.prod .env"
+    echo "   nano .env"
+    exit 1
+fi
+
 # Criar backup do banco se existir
 echo "💾 Criando backup do banco..."
 if docker ps | grep -q "${PROJECT_NAME}-db"; then

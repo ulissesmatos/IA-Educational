@@ -26,7 +26,7 @@ ia-nas-escolas/
 
 ```bash
 # Clonar projeto
-git clone https://github.com/SEU_USERNAME/SEU_REPO.git ia-nas-escolas
+git clone https://github.com/ulissesmatos/IA-Educational.git ia-nas-escolas
 cd ia-nas-escolas
 
 # Configurar variáveis de produção
@@ -36,10 +36,10 @@ nano .env
 
 **Configure estas variáveis:**
 ```bash
-DATABASE_URL=postgresql://ia_user:SUA_SENHA_FORTE@localhost:5432/iaounao
+DATABASE_URL=postgresql://ia_user:SUA_SENHA_FORTE_AQUI@localhost:5432/iaounao
 SESSION_SECRET=SUA_STRING_ALEATORIA_SEGURA_64_CHARS_MINIMO
 DB_USER=ia_user
-DB_PASSWORD=SUA_SENHA_FORTE
+DB_PASSWORD=SUA_SENHA_FORTE_AQUI
 ```
 
 ### 2. No servidor VPS
@@ -47,6 +47,31 @@ DB_PASSWORD=SUA_SENHA_FORTE
 ```bash
 # Conectar via SSH
 ssh ubuntu@SEU_IP_VPS
+
+# Instalar make (opcional, mas útil)
+sudo apt update && sudo apt install -y make
+
+# Criar diretório do projeto
+sudo mkdir -p /opt/ia-nas-escolas
+sudo chown ubuntu:ubuntu /opt/ia-nas-escolas
+cd /opt/ia-nas-escolas
+
+# Clonar projeto
+git clone https://github.com/ulissesmatos/IA-Educational.git .
+
+# Configurar produção
+cp .env.prod .env
+nano .env  # Usar as mesmas variáveis configuradas localmente
+
+# Executar deploy
+./deploy.sh
+```
+
+**Se make não estiver instalado, use:**
+```bash
+# Deploy alternativo sem make
+./maintenance.sh deploy
+```
 
 # Criar diretório do projeto
 sudo mkdir -p /opt/ia-nas-escolas
@@ -72,7 +97,12 @@ make deploy
 
 ## 🔧 Comandos de Manutenção
 
+### Com Make (recomendado se instalado)
+
 ```bash
+# Deploy/atualização
+make deploy
+
 # Ver status
 make status
 
@@ -90,6 +120,34 @@ make stop
 
 # Health check
 make health
+```
+
+### Sem Make (usando script de manutenção)
+
+```bash
+# Deploy/atualização
+./maintenance.sh deploy
+
+# Ver status
+./maintenance.sh status
+
+# Ver logs
+./maintenance.sh logs
+
+# Backup do banco
+./maintenance.sh backup
+
+# Reiniciar
+./maintenance.sh restart
+
+# Parar
+./maintenance.sh stop
+
+# Health check
+./maintenance.sh health
+
+# Ver ajuda
+./maintenance.sh help
 ```
 
 ## 🌐 Configuração do Domínio
