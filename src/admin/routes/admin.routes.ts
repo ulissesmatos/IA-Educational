@@ -48,11 +48,11 @@ router.post('/quiz/:id/toggle', QuizController.toggle);
 // Ferramentas IA
 router.get('/ai-tools', AiToolsController.list);
 router.get('/ai-tools/new', AiToolsController.showCreateForm);
-router.post('/ai-tools', upload.single('logo'), AiToolsController.validators, AiToolsController.create);
+router.post('/ai-tools', upload.single('logo'), AiToolsController.createValidators, AiToolsController.create);
 router.get('/ai-tools/:id/edit', AiToolsController.showEditForm);
-router.put('/ai-tools/:id', upload.single('logo'), AiToolsController.validators, AiToolsController.update);
+router.put('/ai-tools/:id', upload.single('logo'), AiToolsController.updateValidators, AiToolsController.update);
 // Backward compatibility: accept POST from forms that don't use method-override
-router.post('/ai-tools/:id', upload.single('logo'), AiToolsController.validators, AiToolsController.update);
+router.post('/ai-tools/:id', upload.single('logo'), AiToolsController.updateValidators, AiToolsController.update);
 router.delete('/ai-tools/:id', AiToolsController.delete);
 router.post('/ai-tools/:id/toggle', AiToolsController.toggle);
 router.post('/ai-tools/:id/toggle-featured', AiToolsController.toggleFeatured);

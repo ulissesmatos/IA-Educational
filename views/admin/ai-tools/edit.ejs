@@ -181,6 +181,7 @@
                             </div>
                         <% } %>
                         <input type="file" name="logo" accept="image/*" class="admin-form-input">
+                        <input type="hidden" name="logoUrl" value="<%= tool ? (tool.logoUrl || '') : (formData ? (formData.logoUrl || '') : '') %>">
                         <p class="admin-form-help">Envie um arquivo de imagem (PNG/JPG). O arquivo será servido em /uploads/</p>
                     </div>
                 </div>
@@ -202,7 +203,7 @@
                         class="admin-form-input" 
                         rows="4"
                         placeholder="Um recurso por linha&#10;Geração de texto&#10;Tradução&#10;Análise de dados"
-                    ><%= tool && tool.features ? tool.features.join('\n') : (formData && formData.features ? formData.features : '') %></textarea>
+                    ><%= tool && tool.features ? tool.features.join('\n') : (formData && formData.features ? (Array.isArray(formData.features) ? formData.features.join('\n') : formData.features) : '') %></textarea>
                     <p class="admin-form-help">Digite um recurso por linha</p>
                 </div>
                 
@@ -216,7 +217,7 @@
                             class="admin-form-input" 
                             rows="4"
                             placeholder="Um ponto por linha&#10;Fácil de usar&#10;Boa qualidade&#10;Rápido"
-                        ><%= tool && tool.pros ? tool.pros.join('\n') : (formData && formData.pros ? formData.pros : '') %></textarea>
+                        ><%= tool && tool.pros ? tool.pros.join('\n') : (formData && formData.pros ? (Array.isArray(formData.pros) ? formData.pros.join('\n') : formData.pros) : '') %></textarea>
                         <p class="admin-form-help">Um ponto por linha</p>
                     </div>
                     
@@ -229,7 +230,7 @@
                             class="admin-form-input" 
                             rows="4"
                             placeholder="Um ponto por linha&#10;Requer cadastro&#10;Limitado na versão gratuita"
-                        ><%= tool && tool.cons ? tool.cons.join('\n') : (formData && formData.cons ? formData.cons : '') %></textarea>
+                        ><%= tool && tool.cons ? tool.cons.join('\n') : (formData && formData.cons ? (Array.isArray(formData.cons) ? formData.cons.join('\n') : formData.cons) : '') %></textarea>
                         <p class="admin-form-help">Um ponto por linha</p>
                     </div>
                 </div>
@@ -243,7 +244,7 @@
                         class="admin-form-input" 
                         rows="4"
                         placeholder="Um caso de uso por linha&#10;Criar conteúdo para blog&#10;Responder dúvidas de alunos&#10;Gerar ideias criativas"
-                    ><%= tool && tool.useCases ? tool.useCases.join('\n') : (formData && formData.useCases ? formData.useCases : '') %></textarea>
+                    ><%= tool && tool.useCases ? tool.useCases.join('\n') : (formData && formData.useCases ? (Array.isArray(formData.useCases) ? formData.useCases.join('\n') : formData.useCases) : '') %></textarea>
                     <p class="admin-form-help">Digite um caso de uso por linha</p>
                 </div>
             </div>

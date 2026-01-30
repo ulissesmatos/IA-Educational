@@ -102,7 +102,8 @@ export class AiToolsController {
   /**
    * Validadores
    */
-  static validators = [
+  // Validators for create (all required)
+  static createValidators = [
     body('name').trim().notEmpty().withMessage('Nome obrigatório'),
     body('slug').trim().notEmpty().withMessage('Slug obrigatório'),
     body('shortDesc').trim().notEmpty().withMessage('Descrição curta obrigatória'),
@@ -110,6 +111,18 @@ export class AiToolsController {
     body('url').trim().isURL().withMessage('URL inválida'),
     body('categoryId').notEmpty().withMessage('Categoria obrigatória'),
     body('pricingType').isIn(Object.values(PricingType)).withMessage('Tipo de preço inválido')
+  ];
+
+  // Validators for update: fields optional to avoid false-positive "Nome obrigatório" on multipart requests
+  // Use checkFalsy to treat empty strings as absent (use existing values on update)
+  static updateValidators = [
+    body('name').optional({ checkFalsy: true }).trim().notEmpty().withMessage('Nome obrigatório'),
+    body('slug').optional({ checkFalsy: true }).trim().notEmpty().withMessage('Slug obrigatório'),
+    body('shortDesc').optional({ checkFalsy: true }).trim().notEmpty().withMessage('Descrição curta obrigatória'),
+    body('description').optional(),
+    body('url').optional({ checkFalsy: true }).trim().isURL().withMessage('URL inválida'),
+    body('categoryId').optional({ checkFalsy: true }),
+    body('pricingType').optional({ checkFalsy: true }).isIn(Object.values(PricingType)).withMessage('Tipo de preço inválido')
   ];
 
   /**
@@ -123,6 +136,12 @@ export class AiToolsController {
         where: { isActive: true },
         orderBy: { name: 'asc' }
       });
+
+      // If the client expects JSON (AJAX/API), return a concise JSON error
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        res.status(400).json({ error: errors.array()[0].msg, details: errors.array() });
+        return;
+      }
 
       res.render('admin/ai-tools/edit', {
         title: 'Nova Ferramenta IA',
@@ -157,10 +176,10 @@ export class AiToolsController {
           categoryId,
           pricingType,
           pricingDetails: pricingDetails || null,
-          features: Array.isArray(features) ? features : features ? [features] : [],
-          pros: Array.isArray(pros) ? pros : pros ? [pros] : [],
-          cons: Array.isArray(cons) ? cons : cons ? [cons] : [],
-          useCases: Array.isArray(useCases) ? useCases : useCases ? [useCases] : [],
+          features: features ? features.split('\n').map((f: string) => f.trim()).filter((f: string) => f) : [],
+          pros: pros ? pros.split('\n').map((p: string) => p.trim()).filter((p: string) => p) : [],
+          cons: cons ? cons.split('\n').map((c: string) => c.trim()).filter((c: string) => c) : [],
+          useCases: useCases ? useCases.split('\n').map((u: string) => u.trim()).filter((u: string) => u) : [],
           orderIndex: orderIndex ? parseInt(orderIndex) : 0,
           isActive: isActive === 'true',
           isFeatured: isFeatured === 'true'
@@ -208,6 +227,12 @@ export class AiToolsController {
         orderBy: { name: 'asc' }
       });
 
+      // If the client expects JSON (AJAX/API), return a concise JSON error
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        res.status(400).json({ error: errors.array()[0].msg, details: errors.array() });
+        return;
+      }
+
       res.render('admin/ai-tools/edit', {
         title: `Editar ${tool?.name || 'Ferramenta'}`,
         currentPage: 'ai-tools',
@@ -226,26 +251,45 @@ export class AiToolsController {
         orderIndex, isActive, isFeatured
       } = req.body;
 
+      // Get current tool to preserve logo if no new file uploaded
+      const currentTool = await prisma.aiTool.findUnique({
+        where: { id: req.params.id }
+      });
+
+      if (!currentTool) {
+        res.status(404).json({ error: 'Ferramenta não encontrada' });
+        return;
+      }
+
+      // Debug info to help diagnose missing fields
+      console.log('📝 Update body:', Object.keys(req.body).reduce((acc, k) => ({ ...acc, [k]: typeof (req.body as any)[k] === 'string' ? (req.body as any)[k].substring(0, 100) : '[object]'}), {}));
+      console.log('📝 Update file present:', !!(req as any).file);
+
       // Handle uploaded file (multer)
       const file = (req as any).file;
-      const uploadedLogo = file ? `/uploads/${file.filename}` : (logoUrl || null);
+      const uploadedLogo = file ? `/uploads/${file.filename}` : currentTool.logoUrl;
+
+      // Fallbacks: if required fields weren't sent (multipart oddities), preserve current values
+      const finalName = name && String(name).trim() ? String(name).trim() : currentTool.name;
+      const finalSlug = slug && String(slug).trim() ? String(slug).trim() : currentTool.slug;
+      const finalShortDesc = shortDesc && String(shortDesc).trim() ? String(shortDesc).trim() : currentTool.shortDesc;
 
       await prisma.aiTool.update({
         where: { id: req.params.id },
         data: {
-          name,
-          slug,
-          shortDesc,
+          name: finalName,
+          slug: finalSlug,
+          shortDesc: finalShortDesc,
           description,
           url,
           logoUrl: uploadedLogo,
           categoryId,
           pricingType,
           pricingDetails: pricingDetails || null,
-          features: Array.isArray(features) ? features : features ? [features] : [],
-          pros: Array.isArray(pros) ? pros : pros ? [pros] : [],
-          cons: Array.isArray(cons) ? cons : cons ? [cons] : [],
-          useCases: Array.isArray(useCases) ? useCases : useCases ? [useCases] : [],
+          features: features ? features.split('\n').map((f: string) => f.trim()).filter((f: string) => f) : [],
+          pros: pros ? pros.split('\n').map((p: string) => p.trim()).filter((p: string) => p) : [],
+          cons: cons ? cons.split('\n').map((c: string) => c.trim()).filter((c: string) => c) : [],
+          useCases: useCases ? useCases.split('\n').map((u: string) => u.trim()).filter((u: string) => u) : [],
           orderIndex: orderIndex ? parseInt(orderIndex) : 0,
           isActive: isActive === 'true',
           isFeatured: isFeatured === 'true'
