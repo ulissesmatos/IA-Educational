@@ -31,7 +31,7 @@ router.get('/ai-tools', AiToolsController.list);
 router.get('/ai-tools/new', AiToolsController.showCreateForm);
 router.post('/ai-tools', AiToolsController.validators, AiToolsController.create);
 router.get('/ai-tools/:id/edit', AiToolsController.showEditForm);
-router.post('/ai-tools/:id', AiToolsController.validators, AiToolsController.update);
+router.put('/ai-tools/:id', AiToolsController.validators, AiToolsController.update);
 router.delete('/ai-tools/:id', AiToolsController.delete);
 router.post('/ai-tools/:id/toggle', AiToolsController.toggle);
 router.post('/ai-tools/:id/toggle-featured', AiToolsController.toggleFeatured);

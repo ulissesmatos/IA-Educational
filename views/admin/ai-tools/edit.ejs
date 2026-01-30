@@ -32,6 +32,9 @@
     <% } %>
     
     <form action="<%= tool ? `/admin/ai-tools/${tool.id}` : '/admin/ai-tools' %>" method="POST">
+        <% if (tool) { %>
+            <input type="hidden" name="_method" value="PUT">
+        <% } %>
         <!-- Informações Básicas -->
         <div class="admin-card" style="margin-bottom: 1.5rem;">
             <div class="admin-card-header">
@@ -55,16 +58,34 @@
                 
                 <div class="admin-form-group">
                     <label class="admin-form-label">
+                        Slug (URL)
+                        <span style="color: var(--admin-danger);">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="slug" 
+                        class="admin-form-input"
+                        value="<%= tool ? tool.slug : (formData ? formData.slug : '') %>"
+                        required
+                        placeholder="chatgpt"
+                        pattern="[a-z0-9-]+"
+                        title="Apenas letras minúsculas, números e hífens"
+                    >
+                    <p class="admin-form-help">Identificador único para URLs (apenas letras minúsculas, números e hífens)</p>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label class="admin-form-label">
                         Descrição Curta
                         <span style="color: var(--admin-danger);">*</span>
                     </label>
                     <textarea 
-                        name="description" 
+                        name="shortDesc" 
                         class="admin-form-input" 
                         rows="3" 
                         required
                         placeholder="Uma descrição concisa da ferramenta"
-                    ><%= tool ? tool.description : (formData ? formData.description : '') %></textarea>
+                    ><%= tool ? tool.shortDesc : (formData ? formData.shortDesc : '') %></textarea>
                 </div>
                 
                 <div class="admin-form-group">
@@ -72,11 +93,11 @@
                         Descrição Longa
                     </label>
                     <textarea 
-                        name="longDescription" 
+                        name="description" 
                         class="admin-form-input" 
                         rows="6"
                         placeholder="Descrição detalhada da ferramenta, suas capacidades e uso"
-                    ><%= tool ? tool.longDescription || '' : (formData ? formData.longDescription || '' : '') %></textarea>
+                    ><%= tool ? tool.description : (formData ? formData.description : '') %></textarea>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -102,17 +123,17 @@
                     
                     <div class="admin-form-group">
                         <label class="admin-form-label">
-                            Preço
+                            Tipo de Preço
                             <span style="color: var(--admin-danger);">*</span>
                         </label>
-                        <select name="pricing" class="admin-form-input" required>
-                            <option value="free" <%= (tool && tool.pricing === 'free') || (formData && formData.pricing === 'free') ? 'selected' : '' %>>
+                        <select name="pricingType" class="admin-form-input" required>
+                            <option value="FREE" <%= (tool && tool.pricingType === 'FREE') || (formData && formData.pricingType === 'FREE') ? 'selected' : '' %>>
                                 Grátis
                             </option>
-                            <option value="freemium" <%= (tool && tool.pricing === 'freemium') || (formData && formData.pricing === 'freemium') || (!tool && !formData) ? 'selected' : '' %>>
+                            <option value="FREEMIUM" <%= (tool && tool.pricingType === 'FREEMIUM') || (formData && formData.pricingType === 'FREEMIUM') || (!tool && !formData) ? 'selected' : '' %>>
                                 Freemium
                             </option>
-                            <option value="paid" <%= (tool && tool.pricing === 'paid') || (formData && formData.pricing === 'paid') ? 'selected' : '' %>>
+                            <option value="PAID" <%= (tool && tool.pricingType === 'PAID') || (formData && formData.pricingType === 'PAID') ? 'selected' : '' %>>
                                 Pago
                             </option>
                         </select>

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title || 'Erro' %> | <%= siteName %></title>
+    <% var _siteName = (typeof siteName !== 'undefined' && siteName) ? siteName : (typeof locals !== 'undefined' && locals.siteName) ? locals.siteName : 'IA ou Não?'; %>
+    <title><%= title || 'Erro' %> | <%= _siteName %></title>
     <link rel="stylesheet" href="/css/custom.css">
     <style>
         * {

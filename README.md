@@ -63,7 +63,67 @@ Aguarde as mensagens:
 3. Aguarde o facilitador iniciar
 4. Responda as perguntas no tempo!
 
-## 📁 Estrutura do Projeto
+## �️ Desenvolvimento
+
+### Opção 1: Desenvolvimento com Docker (Recomendado)
+
+```bash
+# Subir aplicação + banco com Docker
+npm run dev:docker
+
+# Ou diretamente:
+docker compose up --build
+
+# Parar containers
+npm run dev:docker:down
+# ou
+docker compose down
+```
+
+### Opção 2: Desenvolvimento Local
+
+Para desenvolvimento local, você precisa de PostgreSQL rodando:
+
+```bash
+# Opção A: Usar Docker apenas para o banco
+npm run dev:db
+
+# Instalar dependências
+npm install
+
+# Gerar cliente Prisma
+npm run db:generate
+
+# Executar migrações
+npm run db:migrate
+
+# Popular banco com dados iniciais
+npm run db:seed
+
+# Iniciar servidor em modo desenvolvimento
+npm run dev
+
+# Para parar o banco quando terminar
+npm run dev:db:stop
+```
+
+```bash
+# Opção B: PostgreSQL instalado localmente
+# Certifique-se de que PostgreSQL está rodando na porta 5432
+# com usuário 'postgres' e senha 'postgres'
+
+npm install
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
+
+### Variáveis de Ambiente
+
+O projeto detecta automaticamente se está rodando em Docker ou localmente. Para desenvolvimento local, o `.env` usa `localhost:5432`. Em Docker, usa `postgres:5432`.
+
+## �📁 Estrutura do Projeto
 
 ```
 ia-ou-nao/

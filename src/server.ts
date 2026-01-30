@@ -40,6 +40,10 @@ const io = new Server(httpServer, {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Method override para formulários HTML
+import methodOverride from 'method-override';
+app.use(methodOverride('_method'));
+
 // Variáveis globais para views
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.locals.siteName = process.env.SITE_NAME || 'IA ou Não?';

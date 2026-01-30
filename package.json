@@ -6,6 +6,10 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "dev:docker": "docker compose up --build",
+    "dev:docker:down": "docker compose down",
+    "dev:db": "docker run --name postgres-dev -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=iaounao -p 5432:5432 -d postgres:16-alpine",
+    "dev:db:stop": "docker stop postgres-dev && docker rm postgres-dev",
     "build": "tsc",
     "start": "node dist/server.js",
     "db:migrate": "prisma migrate deploy",
@@ -40,6 +44,7 @@
     "express-session": "^1.19.0",
     "express-validator": "^7.3.1",
     "helmet": "^8.1.0",
+    "method-override": "^3.0.0",
     "pg": "^8.17.2",
     "socket.io": "^4.7.4",
     "zod": "^3.22.4"

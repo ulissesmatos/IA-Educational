@@ -106,7 +106,7 @@ export class AiToolsController {
     body('name').trim().notEmpty().withMessage('Nome obrigatório'),
     body('slug').trim().notEmpty().withMessage('Slug obrigatório'),
     body('shortDesc').trim().notEmpty().withMessage('Descrição curta obrigatória'),
-    body('description').trim().notEmpty().withMessage('Descrição obrigatória'),
+    body('description').optional(),
     body('url').trim().isURL().withMessage('URL inválida'),
     body('categoryId').notEmpty().withMessage('Categoria obrigatória'),
     body('pricingType').isIn(Object.values(PricingType)).withMessage('Tipo de preço inválido')
@@ -190,7 +190,24 @@ export class AiToolsController {
   static async update(req: Request, res: Response): Promise<void> {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(400).json({ error: errors.array()[0].msg });
+      const tool = await prisma.aiTool.findUnique({
+        where: { id: req.params.id },
+        include: { category: true }
+      });
+
+      const categories = await prisma.aiCategory.findMany({
+        where: { isActive: true },
+        orderBy: { name: 'asc' }
+      });
+
+      res.render('admin/ai-tools/edit', {
+        title: `Editar ${tool?.name || 'Ferramenta'}`,
+        currentPage: 'ai-tools',
+        tool,
+        categories,
+        errors: errors.array(),
+        formData: req.body
+      });
       return;
     }
 

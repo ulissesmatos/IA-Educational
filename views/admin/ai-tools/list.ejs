@@ -59,9 +59,9 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <% if (tool.pricing === 'free') { %>
+                                    <% if (tool.pricingType === 'FREE') { %>
                                         <span class="admin-badge admin-badge-success">Grátis</span>
-                                    <% } else if (tool.pricing === 'freemium') { %>
+                                    <% } else if (tool.pricingType === 'FREEMIUM') { %>
                                         <span class="admin-badge admin-badge-info">Freemium</span>
                                     <% } else { %>
                                         <span class="admin-badge admin-badge-secondary">Pago</span>
