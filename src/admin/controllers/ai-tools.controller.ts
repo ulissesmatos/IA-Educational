@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { PrismaClient, PricingType } from '@prisma/client';
 import { body, validationResult } from 'express-validator';
+import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -110,7 +112,8 @@ export class AiToolsController {
     body('description').optional(),
     body('url').trim().isURL().withMessage('URL inválida'),
     body('categoryId').notEmpty().withMessage('Categoria obrigatória'),
-    body('pricingType').isIn(Object.values(PricingType)).withMessage('Tipo de preço inválido')
+    body('pricingType').isIn(Object.values(PricingType)).withMessage('Tipo de preço inválido'),
+    body('logoUrl').optional({ checkFalsy: true }).isURL().withMessage('Logo URL inválida')
   ];
 
   // Validators for update: fields optional to avoid false-positive "Nome obrigatório" on multipart requests
@@ -161,9 +164,18 @@ export class AiToolsController {
         orderIndex, isActive, isFeatured
       } = req.body;
 
-      // Handle uploaded file (multer)
+      // Handle uploaded file (multer) and remove flag
       const file = (req as any).file;
-      const uploadedLogo = file ? `/uploads/${file.filename}` : (logoUrl || null);
+      const removeLogo = req.body.removeLogo === 'true' || req.body.removeLogo === 'on';
+      let finalLogo: string | null = null;
+
+      if (removeLogo) {
+        finalLogo = null;
+      } else if (file) {
+        finalLogo = `/uploads/${file.filename}`;
+      } else {
+        finalLogo = logoUrl || null;
+      }
 
       await prisma.aiTool.create({
         data: {
@@ -172,7 +184,7 @@ export class AiToolsController {
           shortDesc,
           description,
           url,
-          logoUrl: uploadedLogo,
+          logoUrl: finalLogo,
           categoryId,
           pricingType,
           pricingDetails: pricingDetails || null,
@@ -265,9 +277,32 @@ export class AiToolsController {
       console.log('📝 Update body:', Object.keys(req.body).reduce((acc, k) => ({ ...acc, [k]: typeof (req.body as any)[k] === 'string' ? (req.body as any)[k].substring(0, 100) : '[object]'}), {}));
       console.log('📝 Update file present:', !!(req as any).file);
 
-      // Handle uploaded file (multer)
+      // Handle uploaded file (multer) and remove flag
       const file = (req as any).file;
-      const uploadedLogo = file ? `/uploads/${file.filename}` : currentTool.logoUrl;
+      const removeLogo = req.body.removeLogo === 'true' || req.body.removeLogo === 'on';
+
+      // Get current tool and decide final logo
+      const existingTool = currentTool;
+      let finalLogo: string | null = null;
+      if (removeLogo) {
+        finalLogo = null;
+      } else if (file) {
+        finalLogo = `/uploads/${file.filename}`;
+      } else {
+        finalLogo = logoUrl || (existingTool ? existingTool.logoUrl : null);
+      }
+
+      // If replacing/removing an uploaded local file, delete the old file
+      try {
+        if (existingTool && existingTool.logoUrl && existingTool.logoUrl.startsWith('/uploads/')) {
+          const oldFilePath = path.join(process.cwd(), 'public', existingTool.logoUrl);
+          if ((file || removeLogo) && fs.existsSync(oldFilePath)) {
+            fs.unlinkSync(oldFilePath);
+          }
+        }
+      } catch (err) {
+        console.warn('Aviso: erro ao remover arquivo antigo de logo:', (err as any)?.message || err);
+      }
 
       // Fallbacks: if required fields weren't sent (multipart oddities), preserve current values
       const finalName = name && String(name).trim() ? String(name).trim() : currentTool.name;
@@ -282,7 +317,7 @@ export class AiToolsController {
           shortDesc: finalShortDesc,
           description,
           url,
-          logoUrl: uploadedLogo,
+          logoUrl: finalLogo,
           categoryId,
           pricingType,
           pricingDetails: pricingDetails || null,

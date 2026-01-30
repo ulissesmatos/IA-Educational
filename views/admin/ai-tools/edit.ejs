@@ -181,8 +181,16 @@
                             </div>
                         <% } %>
                         <input type="file" name="logo" accept="image/*" class="admin-form-input">
-                        <input type="hidden" name="logoUrl" value="<%= tool ? (tool.logoUrl || '') : (formData ? (formData.logoUrl || '') : '') %>">
                         <p class="admin-form-help">Envie um arquivo de imagem (PNG/JPG). O arquivo será servido em /uploads/</p>
+
+                        <label class="admin-form-label" style="margin-top:0.5rem;">Ou use um link para a imagem</label>
+                        <input type="url" name="logoUrl" class="admin-form-input" value="<%= tool ? (tool.logoUrl || '') : (formData ? (formData.logoUrl || '') : '') %>" placeholder="https://exemplo.com/logo.png">
+
+                        <label class="admin-checkbox-label" style="margin-top:0.5rem;">
+                            <input type="checkbox" name="removeLogo" value="true" <%= (formData && formData.removeLogo === 'true') ? 'checked' : '' %> >
+                            <span>Remover logo atual</span>
+                        </label>
+                        <p class="admin-form-help">Você pode fazer upload ou fornecer um link. Marque 'Remover logo atual' para deletar o logo existente.</p>
                     </div>
                 </div>
             </div>
