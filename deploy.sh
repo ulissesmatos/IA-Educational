@@ -24,6 +24,40 @@ if [ ! -f ".env" ]; then
     exit 1
 fi
 
+# Atualizar código (puxar do origin/main)
+echo "📡 Atualizando código a partir de origin/main..."
+# Abort if there are local changes to avoid unexpected overwrites
+if [ -n "$(git status --porcelain)" ]; then
+    echo "❌ Alterações locais detectadas. Faça commit ou stash antes de rodar o deploy."
+    echo "   Saída de 'git status --porcelain':"
+    git status --porcelain
+    exit 1
+fi
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$CURRENT_BRANCH" != "main" ]; then
+    if [ -t 0 ]; then
+        echo "⚠️ Branch atual é '$CURRENT_BRANCH' (esperado 'main'). Deseja continuar? (s/n)"
+        read -r answer
+        if [ "$answer" != "s" ] && [ "$answer" != "S" ]; then
+            echo "Abortando deploy."
+            exit 1
+        fi
+    else
+        echo "❌ Branch atual é '$CURRENT_BRANCH' (esperado 'main'). Abortando porque não estamos em terminal interativo."
+        exit 1
+    fi
+fi
+
+# Trazer as últimas alterações e limpar branches remotos removidos
+git fetch --all --prune
+if ! git pull --rebase origin main; then
+    echo "❌ Falha ao puxar origin/main. Abortando."
+    exit 1
+fi
+
+echo "✅ Código atualizado para $(git rev-parse --short HEAD)"
+
 # Criar backup do banco se existir
 echo "💾 Criando backup do banco..."
 if docker ps | grep -q "${PROJECT_NAME}-db"; then
