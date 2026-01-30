@@ -31,7 +31,7 @@
         </div>
     <% } %>
     
-    <form action="<%= tool ? `/admin/ai-tools/${tool.id}` : '/admin/ai-tools' %>" method="POST">
+    <form action="<%= tool ? `/admin/ai-tools/${tool.id}` : '/admin/ai-tools' %>" method="POST" enctype="multipart/form-data">
         <% if (tool) { %>
             <input type="hidden" name="_method" value="PUT">
         <% } %>
@@ -168,6 +168,20 @@
                             placeholder="🤖"
                             maxlength="2"
                         >
+                        <p class="admin-form-help">Emoji curto (opcional). Para logo maior, faça upload abaixo.</p>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">
+                            Logo (Imagem)
+                        </label>
+                        <% if (tool && tool.logoUrl) { %>
+                            <div style="margin-bottom: 0.5rem;">
+                                <img src="<%= tool.logoUrl %>" alt="Logo" style="height:48px; border-radius:6px;">
+                            </div>
+                        <% } %>
+                        <input type="file" name="logo" accept="image/*" class="admin-form-input">
+                        <p class="admin-form-help">Envie um arquivo de imagem (PNG/JPG). O arquivo será servido em /uploads/</p>
                     </div>
                 </div>
             </div>

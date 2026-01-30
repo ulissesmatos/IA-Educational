@@ -142,6 +142,10 @@ export class AiToolsController {
         orderIndex, isActive, isFeatured
       } = req.body;
 
+      // Handle uploaded file (multer)
+      const file = (req as any).file;
+      const uploadedLogo = file ? `/uploads/${file.filename}` : (logoUrl || null);
+
       await prisma.aiTool.create({
         data: {
           name,
@@ -149,7 +153,7 @@ export class AiToolsController {
           shortDesc,
           description,
           url,
-          logoUrl: logoUrl || null,
+          logoUrl: uploadedLogo,
           categoryId,
           pricingType,
           pricingDetails: pricingDetails || null,
@@ -222,6 +226,10 @@ export class AiToolsController {
         orderIndex, isActive, isFeatured
       } = req.body;
 
+      // Handle uploaded file (multer)
+      const file = (req as any).file;
+      const uploadedLogo = file ? `/uploads/${file.filename}` : (logoUrl || null);
+
       await prisma.aiTool.update({
         where: { id: req.params.id },
         data: {
@@ -230,7 +238,7 @@ export class AiToolsController {
           shortDesc,
           description,
           url,
-          logoUrl: logoUrl || null,
+          logoUrl: uploadedLogo,
           categoryId,
           pricingType,
           pricingDetails: pricingDetails || null,
