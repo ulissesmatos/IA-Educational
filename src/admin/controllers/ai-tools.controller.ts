@@ -189,6 +189,10 @@ export class AiToolsController {
    */
   static async update(req: Request, res: Response): Promise<void> {
     const errors = validationResult(req);
+
+    // Log method and id for easier debugging in prod
+    console.log(`📝 Update request: method=${req.method}, id=${req.params.id}`);
+
     if (!errors.isEmpty()) {
       const tool = await prisma.aiTool.findUnique({
         where: { id: req.params.id },
