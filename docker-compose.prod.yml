@@ -8,11 +8,10 @@ services:
       args:
         NODE_ENV: production
         GIT_COMMIT: ${GIT_COMMIT:-unknown}
-    environment:
-      - GIT_COMMIT=${GIT_COMMIT:-unknown}
     container_name: ia-nas-escolas-app
     restart: unless-stopped
     environment:
+      - GIT_COMMIT=${GIT_COMMIT:-unknown}
       - NODE_ENV=production
       - PORT=3000
       - IS_DOCKER=true
