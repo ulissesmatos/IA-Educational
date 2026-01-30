@@ -106,6 +106,7 @@ setInterval(async () => {
 async function start(): Promise<void> {
   console.log('🚀 Iniciando IA ou Não?...');
   console.log(`📍 Ambiente: ${NODE_ENV}`);
+  console.log(`📦 GIT_COMMIT: ${process.env.GIT_COMMIT || 'unknown'}`);
 
   // Testar conexão com banco
   const dbConnected = await testConnection();

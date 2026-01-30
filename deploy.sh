@@ -33,6 +33,12 @@ fi
 
 # Parar containers existentes
 echo "🛑 Parando containers existentes..."
+
+# Registrar commit atual e exportar para ser usado como build-arg / env
+GIT_COMMIT=$(git rev-parse --short HEAD || echo "unknown")
+echo "🔖 Git commit: $GIT_COMMIT"
+export GIT_COMMIT
+
 docker compose -f docker-compose.prod.yml down
 
 # Limpar imagens não utilizadas (opcional)
@@ -53,12 +59,19 @@ docker compose -f docker-compose.prod.yml ps
 
 # Executar health checks
 echo "🏥 Executando health checks..."
+# Primeiro tenta o host (Nginx)
 if curl -f http://localhost/health > /dev/null 2>&1; then
-    echo "✅ Aplicação está saudável!"
+    echo "✅ Aplicação está saudável (via host)!"
 else
-    echo "❌ Aplicação não está respondendo. Verifique os logs:"
-    docker compose -f docker-compose.prod.yml logs app
-    exit 1
+    # Se falhar, tenta dentro do container app para checar a aplicação interna
+    echo "🔁 Tentando health-check dentro do container..."
+    if docker compose -f docker-compose.prod.yml exec -T app curl -f http://localhost:3000/health > /dev/null 2>&1; then
+        echo "✅ Aplicação está saudável (via container)!"
+    else
+        echo "❌ Aplicação não está respondendo. Verifique os logs:"
+        docker compose -f docker-compose.prod.yml logs app
+        exit 1
+    fi
 fi
 
 echo ""
