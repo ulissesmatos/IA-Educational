@@ -1,0 +1,52 @@
+<%- include('../partials/header') %>
+
+<div class="admin-header">
+  <div>
+    <h1 class="admin-page-title">Uploads</h1>
+    <p class="admin-page-description">Arquivos enviados (imagens) — gerencie e remova uploads</p>
+  </div>
+</div>
+
+<div class="admin-content">
+  <% if (items && items.length > 0) { %>
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2 class="admin-card-title">Imagens enviadas</h2>
+      </div>
+      <div class="admin-card-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem;">
+          <% items.forEach(it => { %>
+            <div style="border: 1px solid var(--admin-border); padding: 0.75rem; border-radius: 6px; text-align: center; background: white;">
+              <div style="height:100px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:0.5rem;">
+                <img src="<%= it.url %>" alt="<%= it.filename %>" style="max-height:100%; max-width:100%; object-fit:contain;">
+              </div>
+              <div style="font-size:0.85rem; color:var(--admin-text-secondary); margin-bottom:0.5rem;">
+                <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><%= it.filename %></div>
+                <% if (it.mtime) { %>
+                  <div><%= it.mtime.toLocaleString() %></div>
+                <% } %>
+                <% if (it.size) { %>
+                  <div><%= Math.round(it.size / 1024) %> KB</div>
+                <% } %>
+              </div>
+              <div>
+                <a class="admin-btn admin-btn-secondary" href="<%= it.url %>" target="_blank">Abrir</a>
+                <form action="/admin/uploads/<%= it.filename %>/delete" method="POST" style="display:inline; margin-left:0.5rem;">
+                  <button class="admin-btn admin-btn-danger" onclick="return confirm('Confirma remoção deste arquivo?');">Remover</button>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="admin-card">
+      <div class="admin-card-body" style="text-align:center; padding:3rem 1.5rem;">
+        <p style="color:var(--admin-text-secondary);">Nenhum upload encontrado.</p>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

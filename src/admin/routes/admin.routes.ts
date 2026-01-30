@@ -5,6 +5,7 @@ import multer from 'multer';
 import { DashboardController } from '../controllers/dashboard.controller.js';
 import { QuizController } from '../controllers/quiz.controller.js';
 import { AiToolsController } from '../controllers/ai-tools.controller.js';
+import { UploadsController } from '../controllers/uploads.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 
 // Ensure uploads directory exists
@@ -56,5 +57,9 @@ router.post('/ai-tools/:id', upload.single('logo'), AiToolsController.updateVali
 router.delete('/ai-tools/:id', AiToolsController.delete);
 router.post('/ai-tools/:id/toggle', AiToolsController.toggle);
 router.post('/ai-tools/:id/toggle-featured', AiToolsController.toggleFeatured);
+
+// Uploads
+router.get('/uploads', UploadsController.list);
+router.post('/uploads/:filename/delete', UploadsController.delete);
 
 export default router;
