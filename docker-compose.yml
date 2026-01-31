@@ -12,8 +12,8 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./public:/app/public
       - ./views:/app/views
+      - uploads_data:/app/public/uploads
     restart: unless-stopped
 
   postgres:
@@ -35,3 +35,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:
