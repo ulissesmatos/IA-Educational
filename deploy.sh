@@ -65,6 +65,12 @@ if docker ps | grep -q "${PROJECT_NAME}-db"; then
     echo "✅ Backup criado"
 fi
 
+# Garantir que a pasta uploads existe e tem permissões corretas
+echo "📁 Verificando pasta uploads..."
+mkdir -p public/uploads
+chmod 755 public/uploads
+echo "✅ Pasta uploads verificada"
+
 # Parar containers existentes
 echo "🛑 Parando containers existentes..."
 
