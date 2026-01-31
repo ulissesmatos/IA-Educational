@@ -4,36 +4,37 @@ import path from 'path';
 
 const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
 
-export class UploadsController {
-  /**
-   * Busca recursiva por arquivos em um diretório
-   */
-  private static getAllFiles(dirPath: string, relativeTo: string = dirPath): string[] {
-    const files: string[] = [];
+/**
+ * Busca recursiva por arquivos em um diretório
+ */
+function getAllFiles(dirPath: string, relativeTo: string = dirPath): string[] {
+  const files: string[] = [];
 
-    if (!fs.existsSync(dirPath)) {
-      return files;
-    }
-
-    const items = fs.readdirSync(dirPath);
-
-    for (const item of items) {
-      if (item === '.gitkeep') continue;
-
-      const fullPath = path.join(dirPath, item);
-      const stat = fs.statSync(fullPath);
-
-      if (stat.isDirectory()) {
-        // Busca recursiva em subdiretórios
-        files.push(...this.getAllFiles(fullPath, relativeTo));
-      } else if (stat.isFile()) {
-        // Adiciona arquivo relativo ao diretório base
-        files.push(path.relative(relativeTo, fullPath));
-      }
-    }
-
+  if (!fs.existsSync(dirPath)) {
     return files;
   }
+
+  const items = fs.readdirSync(dirPath);
+
+  for (const item of items) {
+    if (item === '.gitkeep') continue;
+
+    const fullPath = path.join(dirPath, item);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      // Busca recursiva em subdiretórios
+      files.push(...getAllFiles(fullPath, relativeTo));
+    } else if (stat.isFile()) {
+      // Adiciona arquivo relativo ao diretório base
+      files.push(path.relative(relativeTo, fullPath));
+    }
+  }
+
+  return files;
+}
+
+export class UploadsController {
 
   /**
    * GET /admin/uploads
@@ -41,7 +42,7 @@ export class UploadsController {
    */
   static async list(req: Request, res: Response): Promise<void> {
     try {
-      const files = this.getAllFiles(uploadsDir);
+      const files = getAllFiles(uploadsDir);
 
       const items = files
         .map((relativePath) => {
