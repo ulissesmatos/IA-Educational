@@ -20,6 +20,14 @@ import { setupAdmin } from './admin-setup.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Garantir que a pasta uploads existe
+import fs from 'fs';
+const uploadsDir = path.join(__dirname, '../public/uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('📁 Pasta uploads criada:', uploadsDir);
+}
+
 // Configuração
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
