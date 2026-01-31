@@ -21,10 +21,15 @@ export class QuizController {
         ]
       });
 
+      const errorMessage = req.query.error ? 'Questão não encontrada ou já removida.' : null;
+      const successMessage = req.query.success ? 'Questão removida com sucesso.' : null;
+
       res.render('admin/quiz/list', {
         title: 'Perguntas do Quiz',
         currentPage: 'quiz',
-        questions
+        questions,
+        errorMessage,
+        successMessage
       });
     } catch (error) {
       console.error('Erro ao listar questões:', error);
@@ -203,16 +208,37 @@ export class QuizController {
   /**
    * DELETE /admin/quiz/:id
    * Deleta questão
+   * Also accepts POST /admin/quiz/:id/delete for HTML forms without method-override
    */
   static async delete(req: Request, res: Response): Promise<void> {
     try {
-      await prisma.question.delete({
+      const result = await prisma.question.deleteMany({
         where: { id: req.params.id }
       });
+
+      if (result.count === 0) {
+        // Not found
+        if (req.method === 'POST' || (req.headers.accept && req.headers.accept.toString().includes('text/html'))) {
+          res.redirect('/admin/quiz?error=notfound');
+          return;
+        }
+        res.status(404).json({ error: 'Questão não encontrada' });
+        return;
+      }
+
+      // Successful delete
+      if (req.method === 'POST' || (req.headers.accept && req.headers.accept.toString().includes('text/html'))) {
+        res.redirect('/admin/quiz?success=deleted');
+        return;
+      }
 
       res.json({ success: true });
     } catch (error) {
       console.error('Erro ao deletar questão:', error);
+      if (req.method === 'POST' || (req.headers.accept && req.headers.accept.toString().includes('text/html'))) {
+        res.status(500).send('Erro ao deletar questão');
+        return;
+      }
       res.status(500).json({ error: 'Erro ao deletar questão' });
     }
   }

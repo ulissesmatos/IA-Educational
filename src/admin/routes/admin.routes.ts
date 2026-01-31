@@ -44,6 +44,8 @@ router.post('/quiz', QuizController.validators, QuizController.create);
 router.get('/quiz/:id/edit', QuizController.showEditForm);
 router.post('/quiz/:id', QuizController.validators, QuizController.update);
 router.delete('/quiz/:id', QuizController.delete);
+// Backward compatibility: accept POST from forms that don't use method-override
+router.post('/quiz/:id/delete', QuizController.delete);
 router.post('/quiz/:id/toggle', QuizController.toggle);
 
 // Ferramentas IA
