@@ -31,7 +31,7 @@
               </div>
               <div>
                 <a class="admin-btn admin-btn-secondary" href="<%= it.url %>" target="_blank">Abrir</a>
-                <form action="/admin/uploads/<%= it.filename %>/delete" method="POST" style="display:inline; margin-left:0.5rem;">
+                <form action="/admin/uploads/<%= encodeURIComponent(it.filename) %>/delete" method="POST" style="display:inline; margin-left:0.5rem;">
                   <button class="admin-btn admin-btn-danger" onclick="return confirm('Confirma remoção deste arquivo?');">Remover</button>
                 </form>
               </div>
