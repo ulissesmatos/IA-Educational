@@ -25,7 +25,7 @@ services:
       - ia-network
     volumes:
       - ./logs:/app/logs
-      - ./public/uploads:/app/public/uploads
+      - uploads_data:/app/public/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
@@ -68,6 +68,7 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:
 
 networks:
   ia-network:
