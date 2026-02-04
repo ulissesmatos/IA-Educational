@@ -200,14 +200,14 @@
 
   <!-- End Game Modal -->
   <div id="end-modal" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title" style="display: flex; align-items: center; gap: 0.5rem;"><%- include('icons/stop', { size: 24 }) %> Encerrar Sala</h3>
+    <div class="modal" style="background: #ffffff;">
+      <div class="modal-header" style="background: #ffffff;">
+        <h3 class="modal-title" style="display: flex; align-items: center; gap: 0.5rem; color: #1a1a1a;"><%- include('icons/stop', { size: 24 }) %> Encerrar Sala</h3>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="background: #ffffff; color: #333;">
         <p>Tem certeza que deseja encerrar a sala? Isso finalizará o jogo para todos os participantes e os dados serão removidos.</p>
       </div>
-      <div class="modal-actions">
+      <div class="modal-actions" style="background: #ffffff;">
         <button id="modal-cancel" class="btn btn-secondary">Cancelar</button>
         <button id="modal-confirm" class="btn btn-danger">Encerrar</button>
       </div>
@@ -476,6 +476,8 @@
     // Update buttons based on state
     function updateButtons(state) {
       const hasPlayers = state.players && state.players.length > 0;
+      const isLastQuestion = state.revealedQuestion && 
+                             state.revealedQuestion.index === state.revealedQuestion.total - 1;
       
       // Visibility - use display instead of hidden class for better control
       btnStart.style.display = state.status === 'lobby' ? 'inline-flex' : 'none';
@@ -486,14 +488,25 @@
       // Enable/disable based on conditions
       btnStart.disabled = !(state.status === 'lobby' && hasPlayers && isConnected);
       btnReveal.disabled = !(state.status === 'asking' && isConnected);
-      btnNext.disabled = !(state.status === 'revealed' && isConnected);
+      btnNext.disabled = !(state.status === 'revealed' && isConnected && !isLastQuestion);
       btnEnd.disabled = !isConnected;
+      
+      // Update button text for last question
+      if (state.status === 'revealed' && isLastQuestion) {
+        btnNext.textContent = '✅ Última Pergunta';
+        btnNext.style.opacity = '0.5';
+      } else if (state.status === 'revealed') {
+        btnNext.innerHTML = '<%- include(\'icons/arrow-right\', { size: 18 }) %> Próxima';
+        btnNext.style.opacity = '1';
+      }
       
       console.log('🔘 Botões atualizados:', {
         status: state.status,
         hasPlayers,
         isConnected,
+        isLastQuestion,
         btnStartDisabled: btnStart.disabled,
+        btnNextDisabled: btnNext.disabled,
         playersCount: state.players?.length
       });
     }
@@ -501,6 +514,8 @@
     // Update control message
     function updateControlMessage(state) {
       const hasPlayers = state.players && state.players.length > 0;
+      const isLastQuestion = state.revealedQuestion && 
+                             state.revealedQuestion.index === state.revealedQuestion.total - 1;
       
       switch (state.status) {
         case 'lobby':
@@ -514,7 +529,11 @@
           controlMessageText.textContent = 'Pergunta liberada! Aguarde as respostas e clique em "Revelar Resultado".';
           break;
         case 'revealed':
-          controlMessageText.textContent = 'Resultado revelado! Clique em "Próxima Pergunta" para continuar.';
+          if (isLastQuestion) {
+            controlMessageText.textContent = '🎉 Última pergunta revelada! Clique em "Encerrar" para finalizar o jogo e ver o ranking final.';
+          } else {
+            controlMessageText.textContent = 'Resultado revelado! Clique em "Próxima Pergunta" para continuar.';
+          }
           break;
         case 'ended':
           controlMessageText.textContent = 'Jogo encerrado. Redirecionando...';
