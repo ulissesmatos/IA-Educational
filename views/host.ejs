@@ -12,13 +12,9 @@
   <!-- QR Code library - usando CDN alternativo -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body class="gradient-bg min-h-screen p-4">
+<body class="min-h-screen p-4" style="background: #ffffff;">
   
-  <!-- Background Decoration -->
-  <div style="position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;">
-    <div style="position: absolute; top: -20%; left: -10%; width: 40%; height: 40%; background: radial-gradient(circle, var(--accent-10) 0%, transparent 70%);"></div>
-    <div style="position: absolute; bottom: -20%; right: -10%; width: 50%; height: 50%; background: radial-gradient(circle, var(--accent-20) 0%, transparent 70%);"></div>
-  </div>
+  <!-- Background removed for clean white design -->
 
   <div class="container container-lg" style="position: relative; z-index: 1;">
     
@@ -280,6 +276,34 @@
   <script>
     // Room code from server
     const ROOM_CODE = '<%= roomCode %>';
+    
+    // Vibrant color palette for player avatars
+    const playerColors = [
+      '#FF6B6B', // Coral Red
+      '#4ECDC4', // Turquoise
+      '#45B7D1', // Sky Blue
+      '#FFA07A', // Light Salmon
+      '#98D8C8', // Mint Green
+      '#F7DC6F', // Sunny Yellow
+      '#BB8FCE', // Lavender
+      '#F8B739', // Golden
+      '#52C78B', // Emerald
+      '#FF85A1', // Pink
+      '#5DADE2', // Light Blue
+      '#F39C12', // Orange
+      '#E74C3C', // Red
+      '#3498DB', // Blue
+      '#1ABC9C', // Teal
+      '#9B59B6', // Purple
+      '#E67E22', // Dark Orange
+      '#16A085', // Dark Teal
+      '#D35400', // Pumpkin
+      '#C0392B'  // Dark Red
+    ];
+    
+    function getPlayerColor(index) {
+      return playerColors[index % playerColors.length];
+    }
     
     // State
     let socket = null;
@@ -555,9 +579,9 @@
           </p>
         `;
       } else {
-        playersList.innerHTML = players.map(p => `
+        playersList.innerHTML = players.map((p, i) => `
           <div class="ranking-item">
-            <div class="player-avatar">${p.nickname.charAt(0).toUpperCase()}</div>
+            <div class="player-avatar" style="background: ${getPlayerColor(i)}; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">${p.nickname.charAt(0).toUpperCase()}</div>
             <span class="ranking-name">${escapeHtml(p.nickname)}</span>
             <span class="ranking-score">${p.score} pts</span>
           </div>

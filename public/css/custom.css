@@ -40,12 +40,12 @@
   --blue-700: #1D4ED8;
   --blue-900: var(--navy);
   
-  /* Accent Principal - Cyan Vibrante */
-  --accent-primary: var(--cyan);
-  --accent-light: var(--cyan-light);
-  --accent-dark: var(--cyan-dark);
-  --accent-subtle: #E5F8FB;
-  --accent-glow: rgba(0, 201, 224, 0.08);
+  /* Accent Principal - Cyan Vibrante (mais intenso) */
+  --accent-primary: #0099FF;
+  --accent-light: #33AAFF;
+  --accent-dark: #0077CC;
+  --accent-subtle: #E5F3FF;
+  --accent-glow: rgba(0, 153, 255, 0.12);
   
   /* Accent Secundário - Dourado */
   --accent-secondary: var(--golden);
@@ -54,10 +54,10 @@
   --accent-secondary-subtle: #FEF8E5;
   --accent-secondary-glow: rgba(245, 184, 0, 0.08);
   
-  /* Opacity Variants - Cyan */
-  --accent-10: rgba(0, 201, 224, 0.1);
-  --accent-20: rgba(0, 201, 224, 0.2);
-  --accent-30: rgba(0, 201, 224, 0.3);
+  /* Opacity Variants - Cyan (mais vibrante) */
+  --accent-10: rgba(0, 153, 255, 0.12);
+  --accent-20: rgba(0, 153, 255, 0.22);
+  --accent-30: rgba(0, 153, 255, 0.35);
   
   /* Opacity Variants - Golden */
   --secondary-10: rgba(245, 184, 0, 0.1);
@@ -180,14 +180,14 @@ body {
   color: var(--text-muted);
 }
 
-/* ========== GRADIENTES MINIMALISTAS ========== */
+/* ========== GRADIENTES MINIMALISTAS (mais vibrantes) ========== */
 .gradient-bg {
   background: var(--bg-primary);
   min-height: 100vh;
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-dark) 100%);
+  background: linear-gradient(135deg, #0099FF 0%, #0066CC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -354,17 +354,18 @@ body {
 }
 
 .btn-primary {
-  background: var(--accent-primary);
+  background: linear-gradient(135deg, #0099FF 0%, #0077DD 100%);
   color: white;
-  border-color: var(--accent-primary);
-  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.1);
+  border-color: #0099FF;
+  box-shadow: 0 2px 8px rgba(0, 153, 255, 0.25);
+  font-weight: 600;
 }
 
 .btn-primary:hover {
-  background: var(--accent-dark);
-  border-color: var(--accent-dark);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #0088EE 0%, #0066CC 100%);
+  border-color: #0088EE;
+  box-shadow: 0 4px 16px rgba(0, 153, 255, 0.35);
+  transform: translateY(-2px);
 }
 
 .btn-primary:active {
@@ -526,9 +527,10 @@ body {
 }
 
 .badge-primary {
-  background: var(--accent-subtle);
-  color: var(--accent-dark);
-  border: 1px solid rgba(37, 99, 235, 0.1);
+  background: rgba(0, 153, 255, 0.15);
+  color: #0066CC;
+  border: 1px solid rgba(0, 153, 255, 0.3);
+  font-weight: 600;
 }
 
 .badge-success {
@@ -840,11 +842,15 @@ body {
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-dark) 100%);
   border-radius: var(--radius-full);
   font-weight: 700;
   font-size: 0.875rem;
   color: white;
+  transition: transform 0.2s ease;
+}
+
+.player-avatar:hover {
+  transform: scale(1.1);
 }
 
 /* ========== CALLOUT / EXPLANATION ========== */

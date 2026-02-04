@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <%- include('partials/head', { title }) %>
-<body class="gradient-bg">
+<body style="background: #ffffff;">
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   
@@ -188,13 +188,20 @@
       width: 2.5rem;
       height: 2.5rem;
       border-radius: 50%;
-      background: var(--accent-primary);
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 600;
       font-size: 1rem;
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: transform 0.2s ease;
+    }
+    
+    .player-bubble:hover {
+      transform: scale(1.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     }
     
     /* Answer callout */
@@ -259,8 +266,7 @@
     }
   </style>
 
-  <!-- Background -->
-  <div class="bg-decoration"></div>
+  <!-- Background removed for clean white design -->
 
   <div class="screen-container">
     
@@ -503,6 +509,34 @@
     const roomCode = '<%= roomCode %>';
     const joinUrl = window.location.origin + '/join?code=' + roomCode;
     
+    // Vibrant color palette for player bubbles
+    const playerColors = [
+      '#FF6B6B', // Coral Red
+      '#4ECDC4', // Turquoise
+      '#45B7D1', // Sky Blue
+      '#FFA07A', // Light Salmon
+      '#98D8C8', // Mint Green
+      '#F7DC6F', // Sunny Yellow
+      '#BB8FCE', // Lavender
+      '#F8B739', // Golden
+      '#52C78B', // Emerald
+      '#FF85A1', // Pink
+      '#5DADE2', // Light Blue
+      '#F39C12', // Orange
+      '#E74C3C', // Red
+      '#3498DB', // Blue
+      '#1ABC9C', // Teal
+      '#9B59B6', // Purple
+      '#E67E22', // Dark Orange
+      '#16A085', // Dark Teal
+      '#D35400', // Pumpkin
+      '#C0392B'  // Dark Red
+    ];
+    
+    function getPlayerColor(index) {
+      return playerColors[index % playerColors.length];
+    }
+    
     // Set join URL
     document.getElementById('join-url').textContent = joinUrl;
     
@@ -634,8 +668,8 @@
     function renderLobby(state) {
       document.getElementById('player-count').textContent = state.players.length;
       
-      const html = state.players.map(p => 
-        `<div class="player-bubble">${p.nickname.charAt(0).toUpperCase()}</div>`
+      const html = state.players.map((p, i) => 
+        `<div class="player-bubble" style="background: ${getPlayerColor(i)};">${p.nickname.charAt(0).toUpperCase()}</div>`
       ).join('');
       document.getElementById('player-list').innerHTML = html;
     }
