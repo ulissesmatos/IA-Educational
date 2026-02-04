@@ -408,13 +408,23 @@
               <!-- Compare Images for Result (IMAGE_COMPARE type) -->
               <div id="r-images-compare" style="display: none; margin-bottom: 1rem;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                  <div style="text-align: center;">
-                    <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">Imagem A</p>
-                    <img id="r-image-a" src="" alt="Imagem A" style="width: 100%; max-height: 150px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary); border: 2px solid var(--border-color);">
+                  <div id="r-image-a-container" style="text-align: center; position: relative;">
+                    <p id="r-label-a" style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">Imagem A</p>
+                    <div style="position: relative; display: inline-block;">
+                      <img id="r-image-a" src="" alt="Imagem A" style="width: 100%; max-height: 150px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary); border: 2px solid var(--border-color);">
+                      <div id="r-check-a" style="display: none; position: absolute; top: -8px; right: -8px; width: 36px; height: 36px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                        <%- include('icons/check', { size: 20 }) %>
+                      </div>
+                    </div>
                   </div>
-                  <div style="text-align: center;">
-                    <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">Imagem B</p>
-                    <img id="r-image-b" src="" alt="Imagem B" style="width: 100%; max-height: 150px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary); border: 2px solid var(--border-color);">
+                  <div id="r-image-b-container" style="text-align: center; position: relative;">
+                    <p id="r-label-b" style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">Imagem B</p>
+                    <div style="position: relative; display: inline-block;">
+                      <img id="r-image-b" src="" alt="Imagem B" style="width: 100%; max-height: 150px; object-fit: contain; border-radius: var(--radius-lg); background: var(--bg-tertiary); border: 2px solid var(--border-color);">
+                      <div id="r-check-b" style="display: none; position: absolute; top: -8px; right: -8px; width: 36px; height: 36px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                        <%- include('icons/check', { size: 20 }) %>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -526,14 +536,69 @@
     }
 
     // ==================== SOCKET CONNECTION ====================
-    const socket = io();
-    socket.emit('host:join', { roomCode });
+    let lastStateTimestamp = Date.now();
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 10;
+    
+    const socket = io({
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: Infinity,
+      timeout: 20000
+    });
+    
+    function joinRoom() {
+      console.log('🔌 Joining room:', roomCode);
+      socket.emit('host:join', { roomCode });
+      lastStateTimestamp = Date.now();
+    }
+    
+    // Initial join
+    socket.on('connect', () => {
+      console.log('✅ Connected to server');
+      reconnectAttempts = 0;
+      joinRoom();
+    });
+    
+    socket.on('disconnect', (reason) => {
+      console.warn('⚠️ Disconnected:', reason);
+    });
+    
+    socket.on('reconnect_attempt', (attempt) => {
+      console.log(`🔄 Reconnect attempt ${attempt}...`);
+      reconnectAttempts = attempt;
+    });
+    
+    socket.on('reconnect', (attempt) => {
+      console.log('✅ Reconnected after', attempt, 'attempts');
+      reconnectAttempts = 0;
+      joinRoom();
+    });
+    
+    socket.on('reconnect_failed', () => {
+      console.error('❌ Reconnection failed. Reloading page...');
+      setTimeout(() => window.location.reload(), 2000);
+    });
 
-    socket.on('room:state', handleState);
+    socket.on('room:state', (state) => {
+      lastStateTimestamp = Date.now();
+      handleState(state);
+    });
+    
     socket.on('player:joined', (p) => console.log('👤 Player joined:', p.nickname));
     socket.on('player:answered', updateAnswerCount);
     socket.on('game:ended', handleGameOver);
     socket.on('error', (e) => console.error('❌ Socket error:', e.message));
+    
+    // Heartbeat: check if we're receiving updates
+    setInterval(() => {
+      const timeSinceLastUpdate = Date.now() - lastStateTimestamp;
+      if (timeSinceLastUpdate > 30000 && socket.connected) {
+        console.warn('⚠️ No updates for 30s, requesting state...');
+        socket.emit('host:join', { roomCode });
+      }
+    }, 10000);
 
     // ==================== STATE HANDLER ====================
     function handleState(state) {
@@ -648,6 +713,47 @@
         imgCompare.style.display = 'block';
         document.getElementById('r-image-a').src = q.imageUrl;
         document.getElementById('r-image-b').src = q.imageUrl2;
+        
+        // Highlight correct image
+        const imgA = document.getElementById('r-image-a');
+        const imgB = document.getElementById('r-image-b');
+        const checkA = document.getElementById('r-check-a');
+        const checkB = document.getElementById('r-check-b');
+        const labelA = document.getElementById('r-label-a');
+        const labelB = document.getElementById('r-label-b');
+        const containerA = document.getElementById('r-image-a-container');
+        const containerB = document.getElementById('r-image-b-container');
+        
+        // Reset styles
+        imgA.style.border = '2px solid var(--border-color)';
+        imgB.style.border = '2px solid var(--border-color)';
+        imgA.style.opacity = '1';
+        imgB.style.opacity = '1';
+        checkA.style.display = 'none';
+        checkB.style.display = 'none';
+        labelA.style.color = 'var(--accent-primary)';
+        labelB.style.color = 'var(--accent-primary)';
+        
+        // Determine which image is correct based on the correct option
+        // Assuming option 0 = Image A is AI, option 1 = Image B is AI, etc.
+        // We need to check if the correct answer mentions "A" or "B"
+        const correctAnswer = q.options[q.correctOption].toUpperCase();
+        
+        if (correctAnswer.includes('A')) {
+          imgA.style.border = '4px solid var(--success)';
+          imgA.style.boxShadow = '0 0 0 4px rgba(34, 197, 94, 0.2)';
+          checkA.style.display = 'flex';
+          labelA.style.color = 'var(--success)';
+          labelA.style.fontWeight = '700';
+          imgB.style.opacity = '0.6';
+        } else if (correctAnswer.includes('B')) {
+          imgB.style.border = '4px solid var(--success)';
+          imgB.style.boxShadow = '0 0 0 4px rgba(34, 197, 94, 0.2)';
+          checkB.style.display = 'flex';
+          labelB.style.color = 'var(--success)';
+          labelB.style.fontWeight = '700';
+          imgA.style.opacity = '0.6';
+        }
       } else if (q.imageUrl) {
         imgWrap.style.display = 'block';
         imgCompare.style.display = 'none';

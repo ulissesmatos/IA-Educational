@@ -334,16 +334,30 @@
     }
 
     // Connect Socket.io
+    let lastStateTimestamp = Date.now();
+    let reconnectAttempts = 0;
+    
     function connectSocket() {
-      socket = io();
+      socket = io({
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: Infinity,
+        timeout: 20000
+      });
+      
+      function joinAsHost() {
+        console.log('🔌 Joining as host:', ROOM_CODE);
+        socket.emit('host:join', { roomCode: ROOM_CODE });
+        lastStateTimestamp = Date.now();
+      }
       
       socket.on('connect', () => {
         console.log('🔌 Socket conectado');
         isConnected = true;
+        reconnectAttempts = 0;
         connectionStatus.style.display = 'none';
-        
-        // Join as host
-        socket.emit('host:join', { roomCode: ROOM_CODE });
+        joinAsHost();
       });
       
       socket.on('disconnect', () => {
@@ -355,9 +369,30 @@
         disableAllButtons();
       });
       
+      socket.on('reconnect_attempt', (attempt) => {
+        console.log(`🔄 Tentativa de reconexão ${attempt}...`);
+        reconnectAttempts = attempt;
+        connectionStatus.querySelector('.callout-content p').textContent = `Tentando reconectar (${attempt})...`;
+      });
+      
+      socket.on('reconnect', (attempt) => {
+        console.log('✅ Reconectado após', attempt, 'tentativas');
+        isConnected = true;
+        reconnectAttempts = 0;
+        connectionStatus.style.display = 'none';
+        joinAsHost();
+      });
+      
+      socket.on('reconnect_failed', () => {
+        console.error('❌ Falha na reconexão. Recarregando...');
+        connectionStatus.querySelector('.callout-content p').textContent = 'Falha na reconexão. Recarregando página...';
+        setTimeout(() => window.location.reload(), 2000);
+      });
+      
       socket.on('room:state', (state) => {
         console.log('📡 Estado recebido:', state);
         currentState = state;
+        lastStateTimestamp = Date.now();
         updateUI(state);
       });
       
@@ -382,6 +417,15 @@
         console.error('❌ Erro:', data.message);
         alert('Erro: ' + data.message);
       });
+      
+      // Heartbeat: check if we're receiving updates
+      setInterval(() => {
+        const timeSinceLastUpdate = Date.now() - lastStateTimestamp;
+        if (timeSinceLastUpdate > 30000 && socket.connected && isConnected) {
+          console.warn('⚠️ Sem atualizações por 30s, solicitando estado...');
+          socket.emit('host:join', { roomCode: ROOM_CODE });
+        }
+      }, 10000);
     }
 
     // Disable all buttons

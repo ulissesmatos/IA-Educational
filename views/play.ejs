@@ -308,6 +308,8 @@
     let questionStartTime = null;
     let hasAnswered = false;
     let mySelectedOption = null;
+    let lastStateTimestamp = Date.now();
+    let reconnectAttempts = 0;
 
     // DOM Elements
     const lobbySection = document.getElementById('lobby-section');
@@ -318,15 +320,66 @@
     const optionsContainer = document.getElementById('options-container');
     const scoreChip = document.getElementById('score-chip');
 
-    // Connect to Socket.io
-    socket = io();
-    socket.emit('join:room', { roomCode, playerId });
+    // Connect to Socket.io with reconnection settings
+    socket = io({
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: Infinity,
+      timeout: 20000
+    });
+    
+    function joinRoom() {
+      console.log('🔌 Joining room:', roomCode, 'as player:', playerId);
+      socket.emit('join:room', { roomCode, playerId });
+      lastStateTimestamp = Date.now();
+    }
+    
+    socket.on('connect', () => {
+      console.log('✅ Connected to server');
+      reconnectAttempts = 0;
+      joinRoom();
+    });
+    
+    socket.on('disconnect', (reason) => {
+      console.warn('⚠️ Disconnected:', reason);
+    });
+    
+    socket.on('reconnect_attempt', (attempt) => {
+      console.log(`🔄 Reconnect attempt ${attempt}...`);
+      reconnectAttempts = attempt;
+    });
+    
+    socket.on('reconnect', (attempt) => {
+      console.log('✅ Reconnected after', attempt, 'attempts');
+      reconnectAttempts = 0;
+      joinRoom();
+    });
+    
+    socket.on('reconnect_failed', () => {
+      console.error('❌ Reconnection failed. Reloading page...');
+      setTimeout(() => window.location.reload(), 2000);
+    });
 
-    socket.on('room:state', updateState);
+    socket.on('room:state', (state) => {
+      lastStateTimestamp = Date.now();
+      updateState(state);
+    });
+    
     socket.on('game:ended', showGameOver);
+    
     socket.on('error', (data) => {
       alert('Erro: ' + data.message);
     });
+    
+    // Heartbeat: check if we're receiving updates
+    setInterval(() => {
+      const timeSinceLastUpdate = Date.now() - lastStateTimestamp;
+      if (timeSinceLastUpdate > 30000 && socket.connected) {
+        console.warn('⚠️ No updates for 30s, rejoining room...');
+        socket.emit('join:room', { roomCode, playerId });
+      }
+    }, 10000);
 
     function updateState(state) {
       console.log('State:', state);
