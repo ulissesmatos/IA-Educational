@@ -491,7 +491,7 @@
   <script>
     // ==================== INITIALIZATION ====================
     const roomCode = '<%= roomCode %>';
-    const joinUrl = window.location.origin + '/join';
+    const joinUrl = window.location.origin + '/join?code=' + roomCode;
     
     // Set join URL
     document.getElementById('join-url').textContent = joinUrl;
