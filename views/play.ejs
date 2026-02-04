@@ -171,6 +171,16 @@
       <!-- Options -->
       <div id="options-container" class="space-y-3 animate-stagger"></div>
 
+      <!-- Submit Button -->
+      <div id="submit-container" class="mt-4 hidden">
+        <button id="submit-answer" class="btn btn-primary" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Enviar Resposta
+        </button>
+      </div>
+
       <!-- Answer Sent Feedback -->
       <div id="waiting-feedback" class="card text-center mt-4 hidden animate-scaleIn" style="padding: 1.5rem;">
         <div style="display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; background: var(--success-bg); border-radius: var(--radius-full); margin-bottom: 0.75rem; color: var(--success-light);">
@@ -421,6 +431,7 @@
           if (me && me.hasAnswered) {
             hasAnswered = true;
             disableOptions();
+            document.getElementById('submit-container').classList.add('hidden');
             waitingFeedback.classList.remove('hidden');
           }
         }
@@ -477,15 +488,16 @@
         </button>
       `).join('');
       
+      // Show submit button and reset state
+      document.getElementById('submit-container').classList.remove('hidden');
+      document.getElementById('submit-answer').disabled = true;
       waitingFeedback.classList.add('hidden');
     }
 
     function selectOption(optionIndex) {
       if (hasAnswered) return;
       
-      hasAnswered = true;
       mySelectedOption = optionIndex;
-      const timeMs = Date.now() - questionStartTime;
       
       // Mark selected option
       document.querySelectorAll('.btn-option').forEach((btn, i) => {
@@ -495,8 +507,20 @@
         }
       });
       
-      // Disable all options
+      // Enable submit button
+      document.getElementById('submit-answer').disabled = false;
+    }
+    
+    function submitAnswer() {
+      if (hasAnswered || mySelectedOption === null) return;
+      
+      hasAnswered = true;
+      const timeMs = Date.now() - questionStartTime;
+      
+      // Disable all options and submit button
       disableOptions();
+      document.getElementById('submit-answer').disabled = true;
+      document.getElementById('submit-container').classList.add('hidden');
       
       // Show feedback
       waitingFeedback.classList.remove('hidden');
@@ -506,10 +530,13 @@
         roomCode,
         playerId,
         questionId: currentQuestion.id,
-        selectedOption: optionIndex,
+        selectedOption: mySelectedOption,
         timeMs
       });
     }
+    
+    // Attach submit button handler
+    document.getElementById('submit-answer').addEventListener('click', submitAnswer);
 
     function disableOptions() {
       document.querySelectorAll('.btn-option').forEach(btn => {
