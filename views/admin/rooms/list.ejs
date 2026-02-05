@@ -1,4 +1,4 @@
-<%- include('../layouts/main', { body: '' }) %>
+<%- include('../partials/header') %>
 
 <style>
 .room-card {
@@ -168,13 +168,6 @@
     margin-bottom: 2rem;
 }
 
-.rooms-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
 .rooms-actions {
     display: flex;
     gap: 0.75rem;
@@ -192,9 +185,14 @@
     transition: all 0.2s ease;
 }
 
-.btn-danger-outline:hover {
+.btn-danger-outline:hover:not(:disabled) {
     background: #DC2626;
     color: white;
+}
+
+.btn-danger-outline:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .btn-secondary {
@@ -232,27 +230,28 @@
 }
 </style>
 
-<div class="admin-page">
-    <div class="rooms-header">
-        <div>
-            <h1 class="admin-page-title">Gerenciar Salas</h1>
-            <p class="admin-page-subtitle">Visualize e gerencie todas as salas de jogo ativas</p>
-        </div>
-        <div class="rooms-actions">
-            <button onclick="cleanupExpired()" class="btn-secondary">
-                <svg style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 0.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Limpar Expiradas
-            </button>
-            <button onclick="endAllRooms()" class="btn-danger-outline" <%= rooms.length === 0 ? 'disabled' : '' %>>
-                <svg style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 0.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Encerrar Todas
-            </button>
-        </div>
+<div class="admin-header">
+    <div>
+        <h1 class="admin-page-title">Gerenciar Salas</h1>
+        <p class="admin-page-description">Visualize e gerencie todas as salas de jogo ativas</p>
     </div>
+    <div class="rooms-actions">
+        <button onclick="cleanupExpired()" class="btn-secondary">
+            <svg style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 0.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Limpar Expiradas
+        </button>
+        <button onclick="endAllRooms()" class="btn-danger-outline" <%= rooms.length === 0 ? 'disabled' : '' %>>
+            <svg style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 0.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Encerrar Todas
+        </button>
+    </div>
+</div>
+
+<div class="admin-content">
 
     <% if (rooms.length === 0) { %>
         <div class="empty-state">
@@ -517,3 +516,5 @@ setInterval(() => {
     }
 }, 30000);
 </script>
+
+<%- include('../partials/footer') %>
