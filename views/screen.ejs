@@ -563,6 +563,8 @@
     let lastStateTimestamp = Date.now();
     let reconnectAttempts = 0;
     const MAX_RECONNECT_ATTEMPTS = 10;
+    let gameHasEnded = false;
+    let heartbeatInterval = null;
     
     const socket = io({
       reconnection: true,
@@ -612,11 +614,33 @@
     
     socket.on('player:joined', (p) => console.log('👤 Player joined:', p.nickname));
     socket.on('player:answered', updateAnswerCount);
-    socket.on('game:ended', handleGameOver);
-    socket.on('error', (e) => console.error('❌ Socket error:', e.message));
+    socket.on('game:ended', (data) => {
+      gameHasEnded = true;
+      
+      // Parar heartbeat
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+      }
+      
+      handleGameOver(data);
+    });
+    socket.on('error', (e) => {
+      console.error('❌ Socket error:', e.message);
+      // Não mostrar erros se o jogo já acabou
+      if (!gameHasEnded) {
+        // Aqui poderia mostrar um banner de erro ao invés de alert
+        console.error('Erro na sala:', e.message);
+      }
+    });
     
     // Heartbeat: check if we're receiving updates
-    setInterval(() => {
+    heartbeatInterval = setInterval(() => {
+      // Parar heartbeat se o jogo acabou
+      if (gameHasEnded) {
+        clearInterval(heartbeatInterval);
+        return;
+      }
+      
       const timeSinceLastUpdate = Date.now() - lastStateTimestamp;
       if (timeSinceLastUpdate > 30000 && socket.connected) {
         console.warn('⚠️ No updates for 30s, requesting state...');

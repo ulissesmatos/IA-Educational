@@ -360,6 +360,8 @@
     // Connect Socket.io
     let lastStateTimestamp = Date.now();
     let reconnectAttempts = 0;
+    let gameHasEnded = false;
+    let heartbeatInterval = null;
     
     function connectSocket() {
       socket = io({
@@ -431,6 +433,13 @@
       
       socket.on('game:ended', (data) => {
         console.log('🏁 Jogo encerrado');
+        gameHasEnded = true;
+        
+        // Parar heartbeat
+        if (heartbeatInterval) {
+          clearInterval(heartbeatInterval);
+        }
+        
         // Redirect to create page after game ends
         setTimeout(() => {
           window.location.href = '/host';
@@ -439,11 +448,20 @@
       
       socket.on('error', (data) => {
         console.error('❌ Erro:', data.message);
-        alert('Erro: ' + data.message);
+        // Não mostrar erros se o jogo já acabou
+        if (!gameHasEnded) {
+          alert('Erro: ' + data.message);
+        }
       });
       
       // Heartbeat: check if we're receiving updates
-      setInterval(() => {
+      heartbeatInterval = setInterval(() => {
+        // Parar heartbeat se o jogo acabou
+        if (gameHasEnded) {
+          clearInterval(heartbeatInterval);
+          return;
+        }
+        
         const timeSinceLastUpdate = Date.now() - lastStateTimestamp;
         if (timeSinceLastUpdate > 30000 && socket.connected && isConnected) {
           console.warn('⚠️ Sem atualizações por 30s, solicitando estado...');

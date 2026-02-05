@@ -320,6 +320,8 @@
     let mySelectedOption = null;
     let lastStateTimestamp = Date.now();
     let reconnectAttempts = 0;
+    let gameHasEnded = false;
+    let heartbeatInterval = null;
 
     // DOM Elements
     const lobbySection = document.getElementById('lobby-section');
@@ -379,11 +381,20 @@
     socket.on('game:ended', showGameOver);
     
     socket.on('error', (data) => {
-      alert('Erro: ' + data.message);
+      // Não mostrar erros se o jogo já acabou
+      if (!gameHasEnded) {
+        alert('Erro: ' + data.message);
+      }
     });
     
     // Heartbeat: check if we're receiving updates
-    setInterval(() => {
+    heartbeatInterval = setInterval(() => {
+      // Parar heartbeat se o jogo acabou
+      if (gameHasEnded) {
+        clearInterval(heartbeatInterval);
+        return;
+      }
+      
       const timeSinceLastUpdate = Date.now() - lastStateTimestamp;
       if (timeSinceLastUpdate > 30000 && socket.connected) {
         console.warn('⚠️ No updates for 30s, rejoining room...');
@@ -594,6 +605,13 @@
               <span class="stat-bar-percentage">${s.percentage}%</span>
             </div>
           `;
+      gameHasEnded = true; // Marcar que o jogo acabou
+      
+      // Parar heartbeat
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+      }
+      
         }).join('');
         document.getElementById('result-stats').innerHTML = statsHtml;
       }
