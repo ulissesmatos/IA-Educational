@@ -305,6 +305,7 @@ export class GameService {
    * Obtém estado completo da sala
    */
   async getRoomState(roomCode: string): Promise<RoomState> {
+    // Força um reload completo dos dados, sem cache
     const room = await prisma.room.findUnique({
       where: { code: roomCode },
       include: {
@@ -313,7 +314,9 @@ export class GameService {
           orderBy: { orderIndex: 'asc' },
           include: { question: true },
         },
-        answers: true,
+        answers: {
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 
