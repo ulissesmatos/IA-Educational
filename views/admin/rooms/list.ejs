@@ -1,0 +1,519 @@
+<%- include('../layouts/main', { body: '' }) %>
+
+<style>
+.room-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+    transition: all 0.2s ease;
+}
+
+.room-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.room-card.status-lobby {
+    border-left-color: #3B82F6;
+}
+
+.room-card.status-asking {
+    border-left-color: #F59E0B;
+}
+
+.room-card.status-revealed {
+    border-left-color: #10B981;
+}
+
+.room-card.status-ended {
+    border-left-color: #6B7280;
+}
+
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.room-code {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1F2937;
+    font-family: 'Courier New', monospace;
+}
+
+.room-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.room-status.lobby {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563EB;
+}
+
+.room-status.asking {
+    background: rgba(245, 158, 11, 0.1);
+    color: #D97706;
+}
+
+.room-status.revealed {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.room-status.ended {
+    background: rgba(107, 114, 128, 0.1);
+    color: #4B5563;
+}
+
+.room-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563EB;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.stat-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1F2937;
+}
+
+.room-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #E5E7EB;
+}
+
+.btn-end {
+    background: #DC2626;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-end:hover {
+    background: #B91C1C;
+}
+
+.btn-end:disabled {
+    background: #D1D5DB;
+    cursor: not-allowed;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+    color: #6B7280;
+    margin-bottom: 2rem;
+}
+
+.rooms-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.rooms-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-danger-outline {
+    background: white;
+    color: #DC2626;
+    border: 2px solid #DC2626;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-danger-outline:hover {
+    background: #DC2626;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6B7280;
+    color: white;
+    border: none;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: #4B5563;
+}
+
+.room-meta {
+    font-size: 0.875rem;
+    color: #6B7280;
+    margin-top: 0.5rem;
+}
+
+.time-remaining {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #6B7280;
+}
+
+.time-remaining.expiring-soon {
+    color: #DC2626;
+    font-weight: 600;
+}
+</style>
+
+<div class="admin-page">
+    <div class="rooms-header">
+        <div>
+            <h1 class="admin-page-title">Gerenciar Salas</h1>
+            <p class="admin-page-subtitle">Visualize e gerencie todas as salas de jogo ativas</p>
+        </div>
+        <div class="rooms-actions">
+            <button onclick="cleanupExpired()" class="btn-secondary">
+                <svg style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 0.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Limpar Expiradas
+            </button>
+            <button onclick="endAllRooms()" class="btn-danger-outline" <%= rooms.length === 0 ? 'disabled' : '' %>>
+                <svg style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 0.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Encerrar Todas
+            </button>
+        </div>
+    </div>
+
+    <% if (rooms.length === 0) { %>
+        <div class="empty-state">
+            <div class="empty-state-icon">🎮</div>
+            <h2 class="empty-state-title">Nenhuma sala ativa</h2>
+            <p class="empty-state-text">Não há salas de jogo abertas no momento</p>
+        </div>
+    <% } else { %>
+        <div class="rooms-list">
+            <% rooms.forEach(room => { %>
+                <div class="room-card status-<%= room.status %>" data-room-code="<%= room.code %>">
+                    <div class="room-header">
+                        <div>
+                            <div class="room-code"><%= room.code %></div>
+                            <div class="room-meta">
+                                Criada em <%= new Date(room.createdAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) %>
+                                <span class="time-remaining <%= room.timeRemaining < 10 ? 'expiring-soon' : '' %>">
+                                    • ⏱️ <%= room.timeRemaining %> min restantes
+                                </span>
+                            </div>
+                        </div>
+                        <span class="room-status <%= room.status %>"><%= room.status %></span>
+                    </div>
+
+                    <div class="room-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Jogadores</div>
+                                <div class="stat-value"><%= room.playerCount %></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-item">
+                            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #D97706;">
+                                <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Perguntas</div>
+                                <div class="stat-value"><%= room.questionCount %></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-item">
+                            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #059669;">
+                                <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Respostas</div>
+                                <div class="stat-value"><%= room.answerCount %></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-item">
+                            <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #7C3AED;">
+                                <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Progresso</div>
+                                <div class="stat-value"><%= room.currentQuestionIndex + 1 %>/<%= room.questionCount %></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="room-actions">
+                        <button onclick="endRoom('<%= room.code %>')" class="btn-end">
+                            <svg style="width: 14px; height: 14px; display: inline; vertical-align: middle; margin-right: 0.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Encerrar Sala
+                        </button>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
+</div>
+
+<script>
+async function endRoom(code) {
+    if (!confirm(`Tem certeza que deseja encerrar a sala ${code}?\n\nTodos os jogadores serão desconectados.`)) {
+        return;
+    }
+
+    const button = document.querySelector(`[data-room-code="${code}"] .btn-end`);
+    button.disabled = true;
+    button.textContent = 'Encerrando...';
+
+    try {
+        const response = await fetch(`/admin/rooms/${code}/end`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Remove o card da sala
+            const card = document.querySelector(`[data-room-code="${code}"]`);
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(-20px)';
+            setTimeout(() => {
+                card.remove();
+                
+                // Se não houver mais salas, recarregar a página
+                if (document.querySelectorAll('.room-card').length === 0) {
+                    location.reload();
+                }
+            }, 300);
+
+            // Mostrar mensagem de sucesso
+            showNotification('success', data.message);
+        } else {
+            throw new Error(data.message);
+        }
+    } catch (error) {
+        console.error('Erro ao encerrar sala:', error);
+        showNotification('error', 'Erro ao encerrar sala: ' + error.message);
+        button.disabled = false;
+        button.innerHTML = '<svg style="width: 14px; height: 14px; display: inline; vertical-align: middle; margin-right: 0.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>Encerrar Sala';
+    }
+}
+
+async function endAllRooms() {
+    const roomCount = document.querySelectorAll('.room-card').length;
+    
+    if (!confirm(`Tem certeza que deseja encerrar TODAS as ${roomCount} sala(s) ativa(s)?\n\nEsta ação não pode ser desfeita!`)) {
+        return;
+    }
+
+    const button = event.target;
+    button.disabled = true;
+    button.textContent = 'Encerrando...';
+
+    try {
+        const response = await fetch('/admin/rooms/end-all', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('success', data.message);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            throw new Error(data.message);
+        }
+    } catch (error) {
+        console.error('Erro ao encerrar todas as salas:', error);
+        showNotification('error', 'Erro ao encerrar salas: ' + error.message);
+        button.disabled = false;
+        button.textContent = 'Encerrar Todas';
+    }
+}
+
+async function cleanupExpired() {
+    if (!confirm('Deseja remover todas as salas expiradas do banco de dados?')) {
+        return;
+    }
+
+    const button = event.target;
+    button.disabled = true;
+    button.textContent = 'Limpando...';
+
+    try {
+        const response = await fetch('/admin/rooms/cleanup-expired', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('success', data.message);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            throw new Error(data.message);
+        }
+    } catch (error) {
+        console.error('Erro ao limpar salas:', error);
+        showNotification('error', 'Erro ao limpar salas: ' + error.message);
+        button.disabled = false;
+        button.textContent = 'Limpar Expiradas';
+    }
+}
+
+function showNotification(type, message) {
+    // Cria elemento de notificação
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        background: ${type === 'success' ? '#10B981' : '#DC2626'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 9999;
+        font-weight: 600;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Adicionar animações CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Auto-refresh a cada 30 segundos
+setInterval(() => {
+    // Apenas recarrega se não houver ações em andamento
+    if (!document.querySelector('button:disabled')) {
+        location.reload();
+    }
+}, 30000);
+</script>

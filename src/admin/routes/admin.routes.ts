@@ -6,6 +6,7 @@ import { DashboardController } from '../controllers/dashboard.controller.js';
 import { QuizController } from '../controllers/quiz.controller.js';
 import { AiToolsController } from '../controllers/ai-tools.controller.js';
 import { UploadsController } from '../controllers/uploads.controller.js';
+import { RoomsController } from '../controllers/rooms.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 
 // Ensure uploads directory exists
@@ -63,5 +64,11 @@ router.post('/ai-tools/:id/toggle-featured', AiToolsController.toggleFeatured);
 // Uploads
 router.get('/uploads', UploadsController.list);
 router.post('/uploads/:filename/delete', UploadsController.delete);
+
+// Gerenciamento de Salas
+router.get('/rooms', RoomsController.list);
+router.post('/rooms/:code/end', RoomsController.endRoom);
+router.post('/rooms/end-all', RoomsController.endAllRooms);
+router.post('/rooms/cleanup-expired', RoomsController.cleanupExpired);
 
 export default router;
