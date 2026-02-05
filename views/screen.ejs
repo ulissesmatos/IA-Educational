@@ -747,47 +747,6 @@
         imgCompare.style.display = 'block';
         document.getElementById('r-image-a').src = q.imageUrl;
         document.getElementById('r-image-b').src = q.imageUrl2;
-        
-        // Highlight correct image
-        const imgA = document.getElementById('r-image-a');
-        const imgB = document.getElementById('r-image-b');
-        const checkA = document.getElementById('r-check-a');
-        const checkB = document.getElementById('r-check-b');
-        const labelA = document.getElementById('r-label-a');
-        const labelB = document.getElementById('r-label-b');
-        const containerA = document.getElementById('r-image-a-container');
-        const containerB = document.getElementById('r-image-b-container');
-        
-        // Reset styles
-        imgA.style.border = '2px solid var(--border-color)';
-        imgB.style.border = '2px solid var(--border-color)';
-        imgA.style.opacity = '1';
-        imgB.style.opacity = '1';
-        checkA.style.display = 'none';
-        checkB.style.display = 'none';
-        labelA.style.color = 'var(--accent-primary)';
-        labelB.style.color = 'var(--accent-primary)';
-        
-        // Determine which image is correct based on the correct option
-        // Assuming option 0 = Image A is AI, option 1 = Image B is AI, etc.
-        // We need to check if the correct answer mentions "A" or "B"
-        const correctAnswer = q.options[q.correctOption].toUpperCase();
-        
-        if (correctAnswer.includes('A')) {
-          imgA.style.border = '4px solid var(--success)';
-          imgA.style.boxShadow = '0 0 0 4px rgba(34, 197, 94, 0.2)';
-          checkA.style.display = 'flex';
-          labelA.style.color = 'var(--success)';
-          labelA.style.fontWeight = '700';
-          imgB.style.opacity = '0.6';
-        } else if (correctAnswer.includes('B')) {
-          imgB.style.border = '4px solid var(--success)';
-          imgB.style.boxShadow = '0 0 0 4px rgba(34, 197, 94, 0.2)';
-          checkB.style.display = 'flex';
-          labelB.style.color = 'var(--success)';
-          labelB.style.fontWeight = '700';
-          imgA.style.opacity = '0.6';
-        }
       } else if (q.imageUrl) {
         imgWrap.style.display = 'block';
         imgCompare.style.display = 'none';
