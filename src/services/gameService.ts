@@ -275,6 +275,8 @@ export class GameService {
       points = BASE_POINTS + calculateTimeBonus(answer.timeMs);
     }
 
+    console.log(`📝 Salvando resposta: Player ${answer.playerId.slice(-4)}, Questão ${question.id}, Opção ${answer.selectedOption}, Correta: ${isCorrect}`);
+
     // Salvar resposta
     await prisma.answer.create({
       data: {
@@ -350,14 +352,23 @@ export class GameService {
       // Se revelado, incluir resposta e estatísticas
       if (room.status === 'revealed') {
         const questionAnswers = room.answers.filter((a) => a.questionId === q.id);
+        
+        console.log(`📊 Calculando estatísticas para pergunta ${q.id}`);
+        console.log(`📊 Total de respostas: ${questionAnswers.length}`);
+        console.log(`📊 Respostas por opção:`, questionAnswers.map(a => a.selectedOption));
+        
         const stats: OptionStats[] = options.map((_, i) => {
           const count = questionAnswers.filter((a) => a.selectedOption === i).length;
+          const percentage = questionAnswers.length > 0 
+            ? Math.round((count / questionAnswers.length) * 100) 
+            : 0;
+          
+          console.log(`📊 Opção ${i}: ${count} respostas (${percentage}%)`);
+          
           return {
             option: i,
             count,
-            percentage: questionAnswers.length > 0 
-              ? Math.round((count / questionAnswers.length) * 100) 
-              : 0,
+            percentage,
           };
         });
 
