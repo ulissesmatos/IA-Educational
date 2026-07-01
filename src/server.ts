@@ -1,13 +1,9 @@
-/**
- * Servidor principal - IA ou Não?
- * Express + Socket.io + PostgreSQL
- */
-
 import express, { Request, Response, NextFunction } from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 import { testConnection, prisma } from './db.js';
 import { setupSocketHandlers } from './realtime/socketHandler.js';
@@ -15,6 +11,7 @@ import apiRoutes from './routes/api.js';
 import pageRoutes from './routes/pages.js';
 import { gameService } from './services/gameService.js';
 import { setupAdmin } from './admin-setup.js';
+import { SEED_QUESTIONS } from './seed-data.js';
 
 // ES Module path handling
 const __filename = fileURLToPath(import.meta.url);
@@ -76,7 +73,7 @@ app.use('/', pageRoutes);
 // Middleware de erro
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('❌ Erro:', err.message);
-  
+
   res.status(500).render('error', {
     statusCode: 500,
     title: 'Erro interno',
@@ -88,7 +85,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 
 // 404 - Página não encontrada
 app.use((_req: Request, res: Response) => {
-  res.status(404).render('error', { 
+  res.status(404).render('error', {
     statusCode: 404,
     title: 'Página não encontrada',
     message: 'A página que você está procurando não existe ou foi movida.',
@@ -110,17 +107,65 @@ setInterval(async () => {
   }
 }, CLEANUP_INTERVAL);
 
+async function runMigrations(): Promise<void> {
+  console.log('🗃️  Executando migrações Prisma...');
+  // Tenta via caminho direto primeiro (mais confiável que npx)
+  const prismaBin = path.join(__dirname, '../node_modules/.bin/prisma');
+  try {
+    execSync(`"${prismaBin}" migrate deploy`, { stdio: 'inherit' });
+  } catch {
+    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+  }
+  console.log('✅ Migrações concluídas!');
+}
+
+async function seedIfEmpty(): Promise<void> {
+  const count = await prisma.question.count();
+  if (count > 0) {
+    console.log(`🌱 ${count} questões já existem — pulando seed.`);
+    return;
+  }
+  console.log('🌱 Banco vazio — inserindo questões iniciais...');
+  for (let i = 0; i < SEED_QUESTIONS.length; i++) {
+    const q = SEED_QUESTIONS[i];
+    await prisma.question.create({
+      data: {
+        type: 'TRUE_FALSE' as any, // eslint-disable-line
+        prompt: q.prompt,
+        imageUrl: null,
+        imageUrl2: null,
+        optionsJson: ['Verdadeiro', 'Falso'],
+        correctOption: q.correctOption,
+        explanation: q.explanation,
+        orderIndex: i,
+        isActive: true,
+      },
+    });
+  }
+  console.log(`✅ ${SEED_QUESTIONS.length} questões inseridas!`);
+}
+
 // Inicialização
 async function start(): Promise<void> {
-  console.log('🚀 Iniciando IA ou Não?...');
+  console.log('🚀 Iniciando Quiz de Redes — CEBRASPE...');
   console.log(`📍 Ambiente: ${NODE_ENV}`);
   console.log(`📦 GIT_COMMIT: ${process.env.GIT_COMMIT || 'unknown'}`);
+
+  // Em produção: rodar migrations e seed antes de qualquer operação no banco
+  if (NODE_ENV === 'production') {
+    await runMigrations();
+  }
 
   // Testar conexão com banco
   const dbConnected = await testConnection();
   if (!dbConnected) {
     console.error('❌ Falha ao conectar com o banco. Encerrando...');
     process.exit(1);
+  }
+
+  // Em produção: seed automático se banco estiver vazio
+  if (NODE_ENV === 'production') {
+    await seedIfEmpty();
   }
 
   // Limpeza inicial de salas expiradas
