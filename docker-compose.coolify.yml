@@ -1,0 +1,36 @@
+version: '3.8'
+
+# ============================================================
+# Docker Compose para deploy via Coolify
+#
+# No Coolify:
+#   1. Crie um serviço PostgreSQL separado (addon do Coolify)
+#   2. Aponte este compose no seu projeto
+#   3. Configure as variáveis de ambiente abaixo no painel do Coolify
+#
+# Variáveis obrigatórias no Coolify:
+#   DATABASE_URL  = postgresql://user:pass@host:5432/quizredes
+#   SESSION_SECRET = (string aleatória longa e segura)
+# ============================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: quiz-redes-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - GAME_NAME=Quiz de Redes — CEBRASPE
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3

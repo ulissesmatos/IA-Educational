@@ -115,15 +115,17 @@ export class QuizController {
       const { prompt, type, correctOption, explanation, imageUrl, imageUrl2, isActive, options } = req.body;
 
       // Definir opções baseado no tipo
-      let questionOptions = options ? JSON.parse(options) : ['IA', 'Não IA'];
+      let questionOptions = options ? JSON.parse(options) : ['Verdadeiro', 'Falso'];
       if (type === 'IMAGE_COMPARE') {
         questionOptions = ['Imagem A', 'Imagem B'];
+      } else if (type === 'TRUE_FALSE') {
+        questionOptions = ['Verdadeiro', 'Falso'];
       }
 
       await prisma.question.create({
         data: {
           prompt,
-          type: (type as QuestionType) || 'IMAGE_CLASSIFY',
+          type: (type as QuestionType) || 'TRUE_FALSE',
           correctOption: parseInt(correctOption),
           optionsJson: questionOptions,
           explanation,
@@ -170,16 +172,18 @@ export class QuizController {
       const { prompt, type, correctOption, explanation, imageUrl, imageUrl2, isActive, options } = req.body;
 
       // Definir opções baseado no tipo
-      let questionOptions = options ? JSON.parse(options) : ['IA', 'Não IA'];
+      let questionOptions = options ? JSON.parse(options) : ['Verdadeiro', 'Falso'];
       if (type === 'IMAGE_COMPARE') {
         questionOptions = ['Imagem A', 'Imagem B'];
+      } else if (type === 'TRUE_FALSE') {
+        questionOptions = ['Verdadeiro', 'Falso'];
       }
 
       await prisma.question.update({
         where: { id: req.params.id },
         data: {
           prompt,
-          type: (type as QuestionType) || 'IMAGE_CLASSIFY',
+          type: (type as QuestionType) || 'TRUE_FALSE',
           correctOption: parseInt(correctOption),
           optionsJson: questionOptions,
           explanation,

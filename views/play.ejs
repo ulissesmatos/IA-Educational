@@ -461,25 +461,24 @@
         'IMAGE_COMPARE': '🖼️🆚🖼️ Compare',
         'TEXT_CLASSIFY': '📝 Texto',
         'HALLUCINATION_DETECT': '🔍 Alucinação',
-        'LGPD_TRAFFIC_LIGHT': '🚦 LGPD'
+        'LGPD_TRAFFIC_LIGHT': '🚦 LGPD',
+        'TRUE_FALSE': '⚡ Verdadeiro ou Falso'
       };
-      
+
       document.getElementById('question-type').textContent = typeLabels[q.type] || q.type;
       document.getElementById('question-counter').textContent = `${q.index + 1} de ${q.total}`;
       document.getElementById('question-prompt').textContent = q.prompt;
-      
+
       // Image handling
       const imgSection = document.getElementById('question-image');
       const imgCompareSection = document.getElementById('question-images-compare');
-      
+
       if (q.type === 'IMAGE_COMPARE' && q.imageUrl && q.imageUrl2) {
-        // Show side-by-side images
         imgSection.classList.add('hidden');
         imgCompareSection.classList.remove('hidden');
         document.getElementById('question-img-a').src = q.imageUrl;
         document.getElementById('question-img-b').src = q.imageUrl2;
       } else if (q.imageUrl) {
-        // Show single image
         imgSection.classList.remove('hidden');
         imgCompareSection.classList.add('hidden');
         document.getElementById('question-img').src = q.imageUrl;
@@ -487,20 +486,33 @@
         imgSection.classList.add('hidden');
         imgCompareSection.classList.add('hidden');
       }
-      
-      // Options with staggered animation
-      optionsContainer.innerHTML = q.options.map((opt, i) => `
-        <button 
-          class="btn-option animate-slideInLeft" 
-          style="animation-delay: ${i * 50}ms;"
-          data-option="${i}"
-          onclick="selectOption(${i})"
-        >
-          <span class="option-letter">${String.fromCharCode(65 + i)}</span>
-          <span style="flex: 1;">${opt}</span>
-        </button>
-      `).join('');
-      
+
+      // Render options
+      if (q.type === 'TRUE_FALSE') {
+        optionsContainer.innerHTML = `
+          <div class="vf-container animate-stagger">
+            <button class="btn-true-false btn-vf-verdadeiro animate-slideInLeft" style="animation-delay: 0ms;" data-option="0" onclick="selectOption(0)">
+              ✅ VERDADEIRO
+            </button>
+            <button class="btn-true-false btn-vf-falso animate-slideInLeft" style="animation-delay: 80ms;" data-option="1" onclick="selectOption(1)">
+              ❌ FALSO
+            </button>
+          </div>
+        `;
+      } else {
+        optionsContainer.innerHTML = q.options.map((opt, i) => `
+          <button
+            class="btn-option animate-slideInLeft"
+            style="animation-delay: ${i * 50}ms;"
+            data-option="${i}"
+            onclick="selectOption(${i})"
+          >
+            <span class="option-letter">${String.fromCharCode(65 + i)}</span>
+            <span style="flex: 1;">${opt}</span>
+          </button>
+        `).join('');
+      }
+
       // Show submit button and reset state
       document.getElementById('submit-container').classList.remove('hidden');
       document.getElementById('submit-answer').disabled = true;
@@ -509,18 +521,17 @@
 
     function selectOption(optionIndex) {
       if (hasAnswered) return;
-      
+
       mySelectedOption = optionIndex;
-      
-      // Mark selected option
-      document.querySelectorAll('.btn-option').forEach((btn, i) => {
+
+      // Mark selected — works for both .btn-option and .btn-true-false
+      document.querySelectorAll('[data-option]').forEach((btn) => {
         btn.classList.remove('selected');
-        if (i === optionIndex) {
+        if (parseInt(btn.dataset.option) === optionIndex) {
           btn.classList.add('selected');
         }
       });
-      
-      // Enable submit button
+
       document.getElementById('submit-answer').disabled = false;
     }
     
@@ -552,7 +563,7 @@
     document.getElementById('submit-answer').addEventListener('click', submitAnswer);
 
     function disableOptions() {
-      document.querySelectorAll('.btn-option').forEach(btn => {
+      document.querySelectorAll('[data-option]').forEach(btn => {
         btn.disabled = true;
       });
     }
@@ -590,8 +601,10 @@
       }
       
       // Correct answer
-      document.getElementById('correct-answer').textContent = 
-        `${String.fromCharCode(65 + q.correctOption)}) ${q.options[q.correctOption]}`;
+      const correctLabel = currentQuestion && currentQuestion.type === 'TRUE_FALSE'
+        ? q.options[q.correctOption]
+        : `${String.fromCharCode(65 + q.correctOption)}) ${q.options[q.correctOption]}`;
+      document.getElementById('correct-answer').textContent = correctLabel;
       
       // Stats bars
       if (q.stats) {

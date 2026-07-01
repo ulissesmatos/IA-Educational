@@ -9,3 +9,5 @@ logs/
 backups/
 nginx/ssl/
 *.sql
+# Mas mantém as migrations do Prisma
+!prisma/migrations/**/*.sql

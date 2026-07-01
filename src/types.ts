@@ -6,12 +6,13 @@
 export type RoomStatus = 'lobby' | 'asking' | 'revealed' | 'ended';
 
 // Tipos de questões
-export type QuestionType = 
-  | 'IMAGE_CLASSIFY' 
+export type QuestionType =
+  | 'IMAGE_CLASSIFY'
   | 'IMAGE_COMPARE'
-  | 'TEXT_CLASSIFY' 
-  | 'HALLUCINATION_DETECT' 
-  | 'LGPD_TRAFFIC_LIGHT';
+  | 'TEXT_CLASSIFY'
+  | 'HALLUCINATION_DETECT'
+  | 'LGPD_TRAFFIC_LIGHT'
+  | 'TRUE_FALSE';
 
 // Player simplificado para transmissão
 export interface PlayerInfo {

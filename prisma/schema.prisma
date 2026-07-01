@@ -25,6 +25,7 @@ enum QuestionType {
   TEXT_CLASSIFY         // Texto de IA ou humano?
   HALLUCINATION_DETECT  // Tem erro/alucinação?
   LGPD_TRAFFIC_LIGHT    // Pode/Depende/Não pode
+  TRUE_FALSE            // Verdadeiro ou Falso (Redes de Computadores)
 }
 
 // Salas de jogo

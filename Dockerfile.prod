@@ -1,50 +1,35 @@
 FROM node:18-alpine3.18
 
-# Instalar dependências do sistema
-RUN apk add --no-cache \
-    curl \
-    dumb-init \
-    openssl \
-    && rm -rf /var/cache/apk/*
+# Dependências do sistema
+RUN apk add --no-cache curl dumb-init openssl && rm -rf /var/cache/apk/*
 
-# Criar usuário não-root
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+# Usuário não-root
+RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
 
 WORKDIR /app
 
-# Copiar arquivos de dependências
+# Instalar dependências (camada cacheável separada do código)
 COPY package*.json ./
 COPY prisma ./prisma/
-
-# Instalar TODAS as dependências (incluindo dev) para build
 RUN npm ci && npm cache clean --force
 
-# Gerar cliente Prisma com arquitetura correta
-RUN npx prisma generate --schema=./prisma/schema.prisma
+# Gerar cliente Prisma
+RUN npx prisma generate
 
-# Copiar código fonte
+# Copiar e buildar
 COPY . .
-
-# Build da aplicação
 RUN npm run build
 
-# Remover dependências de desenvolvimento após build
+# Remover devDependencies
 RUN npm prune --production && npm cache clean --force
 
-# Instalar tsx para execução de scripts TypeScript
-RUN npm install -g tsx
-
-# Mudar propriedade dos arquivos
-RUN chown -R nextjs:nodejs /app
-USER nextjs
+# Permissões
+RUN chmod +x docker-entrypoint.sh && chown -R appuser:nodejs /app
+USER appuser
 
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:3000/health || exit 1
 
-# Usar dumb-init para sinalização adequada
-ENTRYPOINT ["dumb-init", "--"]
-CMD ["npm", "start"]
+ENTRYPOINT ["dumb-init", "--", "/bin/sh", "docker-entrypoint.sh"]

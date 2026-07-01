@@ -688,27 +688,27 @@
       document.getElementById('player-list').innerHTML = html;
     }
 
+    const TYPE_LABELS = {
+      'IMAGE_CLASSIFY': '🖼️ Imagem',
+      'IMAGE_COMPARE': '🖼️🆚🖼️ Compare',
+      'TEXT_CLASSIFY': '📝 Texto',
+      'HALLUCINATION_DETECT': '🔍 Alucinação',
+      'LGPD_TRAFFIC_LIGHT': '🚦 LGPD',
+      'TRUE_FALSE': '⚡ Verdadeiro ou Falso'
+    };
+
     function renderQuestion(state) {
       const q = state.currentQuestion;
-      
-      const types = {
-        'IMAGE_CLASSIFY': '🖼️ Imagem',
-        'IMAGE_COMPARE': '🖼️🆚🖼️ Compare',
-        'TEXT_CLASSIFY': '📝 Texto',
-        'HALLUCINATION_DETECT': '🔍 Alucinação',
-        'LGPD_TRAFFIC_LIGHT': '🚦 LGPD'
-      };
-      
-      document.getElementById('q-type').textContent = types[q.type] || q.type;
+
+      document.getElementById('q-type').textContent = TYPE_LABELS[q.type] || q.type;
       document.getElementById('q-counter').textContent = `${q.index + 1} de ${q.total}`;
       document.getElementById('q-prompt').textContent = q.prompt;
-      
+
       // Image handling
       const imgWrap = document.getElementById('q-image-wrap');
       const imgCompare = document.getElementById('q-images-compare');
-      
+
       if (q.type === 'IMAGE_COMPARE' && q.imageUrl && q.imageUrl2) {
-        // Show side-by-side images
         imgWrap.style.display = 'none';
         imgCompare.style.display = 'block';
         document.getElementById('q-image-a').src = q.imageUrl;
@@ -721,16 +721,30 @@
         imgWrap.style.display = 'none';
         imgCompare.style.display = 'none';
       }
-      
+
       // Options
-      const optionsHtml = q.options.map((opt, i) => `
-        <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; background: var(--bg-secondary); border-radius: var(--radius-md); margin-bottom: 0.5rem;">
-          <span style="width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; background: var(--accent-subtle); border-radius: 50%; font-weight: 600; color: var(--accent-primary);">${String.fromCharCode(65 + i)}</span>
-          <span>${opt}</span>
-        </div>
-      `).join('');
+      let optionsHtml;
+      if (q.type === 'TRUE_FALSE') {
+        optionsHtml = `
+          <div class="vf-container" style="margin-top: 0.5rem;">
+            <div class="btn-true-false btn-vf-verdadeiro btn-vf-display" style="font-size: 1.5rem; padding: 1.25rem;">
+              ✅ VERDADEIRO
+            </div>
+            <div class="btn-true-false btn-vf-falso btn-vf-display" style="font-size: 1.5rem; padding: 1.25rem;">
+              ❌ FALSO
+            </div>
+          </div>
+        `;
+      } else {
+        optionsHtml = q.options.map((opt, i) => `
+          <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; background: var(--bg-secondary); border-radius: var(--radius-md); margin-bottom: 0.5rem;">
+            <span style="width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; background: var(--accent-subtle); border-radius: 50%; font-weight: 600; color: var(--accent-primary);">${String.fromCharCode(65 + i)}</span>
+            <span>${opt}</span>
+          </div>
+        `).join('');
+      }
       document.getElementById('q-options').innerHTML = optionsHtml;
-      
+
       // Counters
       document.getElementById('answered').textContent = state.answeredCount;
       document.getElementById('total').textContent = state.totalPlayers;
@@ -738,25 +752,16 @@
 
     function renderResult(state) {
       const q = state.revealedQuestion;
-      
-      const types = {
-        'IMAGE_CLASSIFY': '🖼️ Imagem',
-        'IMAGE_COMPARE': '🖼️🆚🖼️ Compare',
-        'TEXT_CLASSIFY': '📝 Texto',
-        'HALLUCINATION_DETECT': '🔍 Alucinação',
-        'LGPD_TRAFFIC_LIGHT': '🚦 LGPD'
-      };
-      
-      document.getElementById('r-type').textContent = types[q.type] || q.type;
+
+      document.getElementById('r-type').textContent = TYPE_LABELS[q.type] || q.type;
       document.getElementById('r-counter').textContent = `${q.index + 1} de ${q.total}`;
       document.getElementById('r-prompt').textContent = q.prompt;
-      
+
       // Image handling
       const imgWrap = document.getElementById('r-image-wrap');
       const imgCompare = document.getElementById('r-images-compare');
-      
+
       if (q.type === 'IMAGE_COMPARE' && q.imageUrl && q.imageUrl2) {
-        // Show side-by-side images
         imgWrap.style.display = 'none';
         imgCompare.style.display = 'block';
         document.getElementById('r-image-a').src = q.imageUrl;
@@ -769,27 +774,48 @@
         imgWrap.style.display = 'none';
         imgCompare.style.display = 'none';
       }
-      
+
       // Stats
-      const statsHtml = q.stats.map((s, i) => {
-        const isCorrect = i === q.correctOption;
-        return `
-          <div class="stat-row">
-            <span class="stat-letter ${isCorrect ? 'correct' : ''}">${String.fromCharCode(65 + i)}</span>
-            <div class="stat-bar-wrapper">
-              <div class="stat-bar-fill ${isCorrect ? 'correct' : ''}" style="width: ${s.percentage}%;"></div>
+      let statsHtml;
+      if (q.type === 'TRUE_FALSE') {
+        const vfLabels = ['✅ Verdadeiro', '❌ Falso'];
+        const vfColors = ['#22C55E', '#DC2626'];
+        statsHtml = q.stats.map((s, i) => {
+          const isCorrect = i === q.correctOption;
+          return `
+            <div class="stat-row" style="${isCorrect ? 'border: 2px solid ' + vfColors[i] + ';' : ''}">
+              <span class="stat-letter" style="background: ${isCorrect ? vfColors[i] : 'var(--bg-tertiary)'}; color: ${isCorrect ? '#fff' : 'inherit'}; width: auto; padding: 0 0.75rem; border-radius: var(--radius-md); font-size: 0.875rem;">${vfLabels[i]}</span>
+              <div class="stat-bar-wrapper">
+                <div class="stat-bar-fill" style="width: ${s.percentage}%; background: ${isCorrect ? vfColors[i] : 'var(--accent-primary)'};"></div>
+              </div>
+              <span class="stat-percentage">${s.percentage}%</span>
+              <span class="text-small text-muted">(${s.count})</span>
             </div>
-            <span class="stat-percentage">${s.percentage}%</span>
-            <span class="text-small text-muted">(${s.count})</span>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      } else {
+        statsHtml = q.stats.map((s, i) => {
+          const isCorrect = i === q.correctOption;
+          return `
+            <div class="stat-row">
+              <span class="stat-letter ${isCorrect ? 'correct' : ''}">${String.fromCharCode(65 + i)}</span>
+              <div class="stat-bar-wrapper">
+                <div class="stat-bar-fill ${isCorrect ? 'correct' : ''}" style="width: ${s.percentage}%;"></div>
+              </div>
+              <span class="stat-percentage">${s.percentage}%</span>
+              <span class="text-small text-muted">(${s.count})</span>
+            </div>
+          `;
+        }).join('');
+      }
       document.getElementById('r-stats').innerHTML = statsHtml;
-      
+
       // Correct answer
-      document.getElementById('r-answer').textContent = 
-        `${String.fromCharCode(65 + q.correctOption)}) ${q.options[q.correctOption]}`;
-      
+      const correctLabel = q.type === 'TRUE_FALSE'
+        ? q.options[q.correctOption]
+        : `${String.fromCharCode(65 + q.correctOption)}) ${q.options[q.correctOption]}`;
+      document.getElementById('r-answer').textContent = correctLabel;
+
       // Explanation
       document.getElementById('r-explanation').textContent = q.explanation;
     }
